@@ -27,16 +27,33 @@ def getNextContexts(context: tuple[str or int], cols: tuple[str], table_name: se
                     nextContexts.append(res)
     return nextContexts
 
-
-def getContext(x):
-    pass
-
-
 N = float("inf")
 
 
-def joinContexts(c1, c2, attribute):
-    pass
+def joinContexts(context1, context2, cols1, cols2):
+    """
+
+    Args:
+        context1: tuple
+        context2: tuple
+        cols1: names of the columns of context 1 (list of strings)
+        cols2: names of the columns of context 2 (list of strings)
+
+    Returns: joined context (tuple?) and the column name that joins them together
+
+    """
+    context1, context2 = list(context1), list(context2)
+    joinedContext = context1
+    for i, c1 in enumerate(context1):
+        for j, c2 in enumerate(context2):
+            if cols1[i] == cols2[j] and c1 == c2:
+                j_stop = j
+                break
+    joinedContext.extend(context2[0:j_stop])
+    if j_stop != (len(context2) - 1):
+        joinedContext.extend(context2[j_stop + 1:len(context2)])
+
+    return tuple(joinedContext), cols2[j_stop]
 
 
 class DecisionTreeNode:
@@ -45,9 +62,6 @@ class DecisionTreeNode:
         self.left = left
         self.right = right
 
-
-def decision_tree_learning():
-    pass
 
 
 def treeSize(tree):
@@ -62,7 +76,9 @@ def Q():
     pass
 
 
-def joinTwoTables():
+def joinTwoTables(T1, T2, colName):
+    # creates the join table from T1 and T2 and saves it in the database for easy access
+    query = f"select * from {T1} join {T2} on {colName}"
     pass
 
 
