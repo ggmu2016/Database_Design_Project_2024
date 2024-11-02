@@ -7,3 +7,8 @@ def Query2Tuple(query: str):
     with engine.connect() as conn:
         result = conn.execute(text(query))
     return result
+
+# function that creates a different table/or create view
+
+def main():
+    Query2Tuple("select ")
