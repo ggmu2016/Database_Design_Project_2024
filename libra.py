@@ -100,3 +100,10 @@ def libra(O_pos: tuple[str or int], O_neg: tuple[str or int]):
         for context in c:
             L = joinTwoTables()
     return ans
+
+def main():
+    O_pos = Query2Tuple('SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = \'Engineering\'')
+    #fetch all tables
+    print(O_pos)
+    print("his")
+main()
