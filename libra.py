@@ -82,7 +82,7 @@ def joinTwoTables(T1, T2, colName):
     pass
 
 
-def libra(O_pos: tuple[str or int], O_neg: tuple[str or int]):
+def libra(O_pos: list[tuple[str or int]], O_neg: list[tuple[str or int]]):
     x = O_pos[1]
     context = getContext(x)
     L = context.copy()
@@ -102,8 +102,21 @@ def libra(O_pos: tuple[str or int], O_neg: tuple[str or int]):
     return ans
 
 def main():
-    O_pos = Query2Tuple('SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = \'Engineering\'')
-    #fetch all tables
+    positiveQuery = Query2Tuple('SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = \'Engineering\'')
+    O_pos = set()
+    for row in positiveQuery:
+        O_pos.add(tuple(row))
+    O_pos = list(O_pos)
+    
+    negativeQuery = Query2Tuple('SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" >= 500 OR department."school" != \'Engineering\'')
+    O_neg = set()
+    for row in negativeQuery:
+        if tuple(row) not in O_pos:
+            O_neg.add(tuple(row)) 
+    O_neg = list(O_neg)
+
     print(O_pos)
-    print("his")
+    print(O_neg)
+
+    libra(O_pos, O_neg)
 main()
