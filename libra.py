@@ -31,7 +31,6 @@ def getNextContexts(context, table_name):
                         nextContexts.append(res_dict)
     return nextContexts
 
-N = float("inf")
 
 
 def joinContexts(context1, context2):
@@ -84,22 +83,49 @@ def Q():
     pass
 
 
-def joinTwoTables(T1, T2, colName):
+def joinTwoTables(joined_context, common_column):
+    """
+
+    Args:
+        joined_context: list of dictionaries
+
+    Returns:
+
+    """
     # creates the join table from T1 and T2 and saves it in the database for easy access
-    query = f"select * from {T1} join {T2} on {colName}"
-    pass
+    table_names = joined_context["tableName"].split('&')
+    table1 = table_names[0]
+    if len(table_names)>1:
+        table2 = table_names[1]
+
+    query = f"select * from {table1} join {table2} on {common_column}"
+    res = Query2Tuple(query)
+
+    # maybe save this result somewhere??
 
 
-def libra(O_pos: tuple[str or int], O_neg: tuple[str or int]):
-    x = O_pos[1]
-    context = getContext(x)
-    L = context.copy()
-    heapq.heapify(L)
+def libra(O_pos, O_neg, N):
+    """
+
+    Args:
+        O_pos:
+        O_neg:
+        N:
+
+    Returns:
+
+    """
+    init_context = O_pos[0]
+    table_name = set()
+    contexts = getNextContexts(init_context, table_name) # list of dictionaries
+    L = contexts.copy()
+    #heapq.heapify(L)
     while L:
-        c = heapq.heappop(L)
-        if len(c) > N:
-            break
-        T_c = joinContexts(c1, c2, attribute)
+        curr_context = L.pop()
+        if len(curr_context) > N:
+            continue
+        (joined_contexts, common_column) = joinContexts(init_context, curr_context)
+        joined_table = joinTwoTables(joined_contexts,common_column)
         T = DecisionTreeNode()
         tree = decision_tree_learning(T_c, T, O_pos, O_neg)
         if treeSize(tree) <= N and findEntropy(tree) == 0:
@@ -117,15 +143,15 @@ def main():
     context = {"studentID": "Alice"}
     table_name = set()
     result = getNextContexts(context, table_name)
-    print(result)      # returns list of dictionaries
+    #print(result)      # returns list of dictionaries
 
 
     # testing joinContexts
     context1 = {'studentID': 'Alice', 'deptCode': 'Comp.', 'courseID': 201, 'tableName': 'registration'}
     context2 = {'deptCode': 'Comp.', 'school': 'Engineering', 'tableName': 'department'}
     (joined_contexts, joined_colname) = joinContexts(context1,context2)
-    print('joined_contexts: ', joined_contexts)
-    print('joined_colname: ', joined_colname)
+    #print('joined_contexts: ', joined_contexts)
+    #print('joined_colname: ', joined_colname)
 
     # Hyuntae's stuff
     departmentTable = Query2Tuple(
@@ -133,9 +159,9 @@ def main():
     majorTable = Query2Tuple('SELECT * FROM major')
     registrationTable = Query2Tuple('SELECT * FROM registration')
 
-    print(departmentTable)
-    print(majorTable)
-    print(registrationTable)
+    #print(departmentTable)
+    #print(majorTable)
+    #print(registrationTable)
 
     positiveQuery = Query2Tuple(
         'SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = \'Engineering\'')
@@ -155,7 +181,7 @@ def main():
     print(O_pos)
     print(O_neg)
 
-    libra(O_pos, O_neg)
+    #libra(O_pos, O_neg)
 
 
 
