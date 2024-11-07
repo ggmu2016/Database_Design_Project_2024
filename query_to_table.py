@@ -6,9 +6,8 @@ from create_tables import engine
 def Query2Tuple(query: str):
     with engine.connect() as conn:
         result = conn.execute(text(query))
-    return result
+        result_dict = result.mappings().all() # python list of dictionaries
+    return result_dict
 
 # function that creates a different table/or create view
 
-def main():
-    Query2Tuple("select ")
