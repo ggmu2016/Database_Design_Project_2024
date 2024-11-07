@@ -116,8 +116,8 @@ def main():
     # testing getNextContexts
     context = {"studentID": "Alice"}
     table_name = set()
-    #result = getNextContexts(context, table_name)
-    #print(result)      # returns list of dictionaries
+    result = getNextContexts(context, table_name)
+    print(result)      # returns list of dictionaries
 
 
     # testing joinContexts
@@ -126,5 +126,37 @@ def main():
     (joined_contexts, joined_colname) = joinContexts(context1,context2)
     print('joined_contexts: ', joined_contexts)
     print('joined_colname: ', joined_colname)
+
+    # Hyuntae's stuff
+    departmentTable = Query2Tuple(
+        'SELECT * FROM department')  # we need to decide how to convert the resultant object into something we can work with
+    majorTable = Query2Tuple('SELECT * FROM major')
+    registrationTable = Query2Tuple('SELECT * FROM registration')
+
+    print(departmentTable)
+    print(majorTable)
+    print(registrationTable)
+
+    positiveQuery = Query2Tuple(
+        'SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = \'Engineering\'')
+    O_pos = set()
+    for row in positiveQuery:
+        O_pos.add(tuple(row))
+    O_pos = list(O_pos)
+
+    negativeQuery = Query2Tuple(
+        'SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" >= 500 OR department."school" != \'Engineering\'')
+    O_neg = set()
+    for row in negativeQuery:
+        if tuple(row) not in O_pos:
+            O_neg.add(tuple(row))
+    O_neg = list(O_neg)
+
+    print(O_pos)
+    print(O_neg)
+
+    libra(O_pos, O_neg)
+
+
 
 main()
