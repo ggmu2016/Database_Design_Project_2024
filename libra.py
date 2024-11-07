@@ -102,12 +102,20 @@ def libra(O_pos: list[tuple[str or int]], O_neg: list[tuple[str or int]]):
     return ans
 
 def main():
+    departmentTable = Query2Tuple('SELECT * FROM department') #we need to decide how to convert the resultant object into something we can work with
+    majorTable = Query2Tuple('SELECT * FROM major')
+    registrationTable = Query2Tuple('SELECT * FROM registration')
+
+    print(departmentTable)
+    print(majorTable)
+    print(registrationTable)
+    
     positiveQuery = Query2Tuple('SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = \'Engineering\'')
     O_pos = set()
     for row in positiveQuery:
         O_pos.add(tuple(row))
     O_pos = list(O_pos)
-    
+
     negativeQuery = Query2Tuple('SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" >= 500 OR department."school" != \'Engineering\'')
     O_neg = set()
     for row in negativeQuery:
