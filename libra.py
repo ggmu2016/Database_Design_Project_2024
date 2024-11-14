@@ -81,10 +81,11 @@ class DecisionTreeNode:
         self.right = right
 
 
-
-def treeSize(tree):
-    pass
-
+# measure a tree's cardinality by the number of nodes
+def treeSize(treeNode):
+    if not treeNode:
+        return 0
+    return 1 + treeSize(treeNode.left) + treeSize(treeNode.right)
 
 def findEntropy(tree):
     pass
