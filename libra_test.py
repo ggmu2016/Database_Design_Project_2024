@@ -8,18 +8,18 @@ class TestLibraFunctions(unittest.TestCase):
         result = getNextContexts(context)
         self.assertIsInstance(result, list)
         self.assertTrue(all(isinstance(item, dict) for item in result))
+        self.assertEqual(result, [
+            {'studentID': 'Alice', 'deptCode': 'Chem.', 'tableName': 'major', 'joinCol': 'studentID'},
+            {'studentID': 'Bob', 'deptCode': 'Comp.', 'tableName': 'major', 'joinCol': 'deptCode'},
+            {'deptCode': 'Comp.', 'school': 'Engineering', 'tableName': 'department', 'joinCol': 'deptCode'}
+        ])
 
     def test_joinContexts(self):
         context1 = {'studentID': 'Alice', 'deptCode': 'Comp.', 'courseID': 201, 'tableName': 'registration'}
         context2 = {'deptCode': 'Comp.', 'school': 'Engineering', 'tableName': 'department'}
         joined_contexts, joined_colname = joinContexts(context1, context2)
-        self.assertIsInstance(joined_contexts, dict)
+        self.assertEqual(joined_contexts, {'studentID': 'Alice', 'deptCode': 'Comp.', 'courseID': 201, 'school': 'Engineering', 'tableName': 'registration&department', 'joinCol': 'deptCode'})
         self.assertEqual(joined_colname, 'deptCode')
-
-# TODO: this test should check if the query is correct
-    # def test_joinTwoTables(self):
-    #     joined_context = {'studentID': 'Alice', 'deptCode': 'Comp.', 'courseID': 201, 'tableName': 'registration&department', 'joinCol': 'deptCode'}
-    #     result = joinTwoTables(joined_context)
 
 #TODO: wait for the implementation of decision_tree_learning
     # def test_libra(self):
@@ -32,7 +32,7 @@ class TestLibraFunctions(unittest.TestCase):
         size = treeSize(tree)
         self.assertEqual(size, 3)
 
-#TODO: figure out how O_pos is represented for Q. It is a dictionary or a list of dictionaries?
+#TODO: wait for implementation of decision tree
     # def test_Q(self):
     #     O_pos = [{"studentID": "Alice"}]
     #     context = {"studentID": "Alice", "tableName": "registration&department", "joinCol": "deptCode"}
