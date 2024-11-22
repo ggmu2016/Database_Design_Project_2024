@@ -1,6 +1,6 @@
 import heapq
 from query_to_table import Query2Tuple
-
+from decision_tree_learning import DTL
 # using a dictionary to store overall column names to tables, i.e, {col_name:[table1,...,tableN]}
 columnsInTables = {"studentID": ["registration", "major"], "deptCode": ["registration", "major", "department"],
                    "courseID": ["registration"],
@@ -93,7 +93,7 @@ def findEntropy(tree):
 #given O+, context information, and a tree extract a query
 def Q(O_pos, context, tree):
     #use O+ to extract the name of the column actually being selected
-    selectedAttribute = O_pos.keys()[0]
+    selectedAttributes = ", ".join(list(O_pos[0].keys()))
     #first get the join and table information
     joinTables = context["tableName"].split('&')
     joinAttribute = context["joinCol"]
@@ -103,17 +103,20 @@ def Q(O_pos, context, tree):
     def obtainSelectionPredicates(node): #traversal algorithm
         if not node:
             return
-        # some sort of if statement to determine if the node is a label leaf node or a predicate node
-        if node.value != "yes" and node.value != "no":
-            selectionPredicates.append(node.value) # makes the assumption that we store the predicate in value, can be changed
+        # determines if the node is a leaf or a predicate
+        if node.value != "?" and node.value != "✓" and node.value != "X":
+            selectionPredicates.append(' '.join(node.value))
             obtainSelectionPredicates(node.left)
             obtainSelectionPredicates(node.right)
     obtainSelectionPredicates(tree)
-
     #form the query string using the resultant information
     tablesString = ' JOIN '.join(joinTables)
     predicateString = ' AND '.join(selectionPredicates)
-    queryString = f"SELECT {selectedAttribute} FROM {tablesString} ON {joinTables[0]}.{joinAttribute}={joinTables[1]}.{joinAttribute} WHERE {predicateString};"
+    queryString = ""
+    if len(joinTables) == 2:
+        queryString = f"SELECT {selectedAttributes} FROM {tablesString} JOIN ON {joinTables[0]}.{joinAttribute}={joinTables[1]}.{joinAttribute} WHERE {predicateString};"
+    else: 
+        queryString = f"SELECT {selectedAttributes} FROM {tablesString} WHERE {predicateString};"
     return queryString
 
 def joinTwoTables(joined_context):
@@ -174,7 +177,7 @@ def libra(O_pos, O_neg):
         joined_table = joinTwoTables(curr_context)
 
         T = DecisionTreeNode()
-        tree = decision_tree_learning(joined_table, T, O_pos, O_neg)
+        tree = DTL(joined_table, T, O_pos, O_neg)
         if treeSize(tree) <= N and findEntropy(tree) == 0:
             ans = Q(O_pos, curr_context, tree)
             N = treeSize(tree)
