@@ -218,11 +218,8 @@ def calculate_side_entropy(O_pos, O_neg, T):
             if w == o:
                 intersection += 1
 
-    # Calculates lambda
-    l = pos + neg
-
     if intersection == 0:
-        return 0, l
+        return 0, intersection
 
     else:
         # Calculates the entropy
@@ -241,7 +238,7 @@ def calculate_side_entropy(O_pos, O_neg, T):
 
         entropy = -(p_log + n_log)
 
-        return entropy, l
+        return entropy, intersection
 
 
 # function 4, 5, 6 combined
