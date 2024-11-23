@@ -47,10 +47,13 @@ def information_gain(a, O_pos, O_neg, T):
     l_entropy, lambda_pos = calculate_side_entropy(O_pos, O_neg, T_pos)
     r_entropy, lambda_neg = calculate_side_entropy(O_pos, O_neg, T_neg)
 
+    if l_entropy is None or r_entropy is None:
+        return 0
+    
     # Calculates the information gain
     pos_coefficient = lambda_pos / (lambda_pos + lambda_neg)
     neg_coefficient = lambda_neg / (lambda_pos + lambda_neg)
-
+    
     left_entropy = pos_coefficient * l_entropy
     right_entropy = neg_coefficient * r_entropy
 
@@ -226,17 +229,12 @@ def calculate_side_entropy(O_pos, O_neg, T):
         p = pos / intersection
         n = neg / intersection
 
-        if p > 0:
+        if p > 0 and n > 0:
             p_log = p * math.log2(p)
-        else:
-            p_log = 0
-
-        if n > 0:
             n_log = n * math.log2(n)
-        else:
-            n_log = 0
-
-        entropy = -(p_log + n_log)
+            entropy = -(p_log + n_log)
+        else: 
+            entropy = None
 
         return entropy, intersection
 
