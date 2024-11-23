@@ -48,8 +48,9 @@ def information_gain(a, O_pos, O_neg, T):
     r_entropy, lambda_neg = calculate_side_entropy(O_pos, O_neg, T_neg)
 
     # Calculates the information gain
-    pos_coefficient = lambda_pos / (lambda_pos + lambda_neg)
-    neg_coefficient = lambda_neg / (lambda_pos + lambda_neg)
+    denominator = lambda_pos + lambda_neg
+    pos_coefficient = lambda_pos / denominator
+    neg_coefficient = lambda_neg / denominator
 
     left_entropy = pos_coefficient * l_entropy
     right_entropy = neg_coefficient * r_entropy
@@ -57,7 +58,6 @@ def information_gain(a, O_pos, O_neg, T):
     information_gain = s_entropy - (left_entropy + right_entropy)
 
     return information_gain
-
 
 # function 3
 # Divides the table into two tables based on condition a
@@ -157,16 +157,24 @@ def calculate_entropy(O_pos, O_neg, T):
             if w == o:
                 intersection += 1
 
-    # Calculates the total entropy of the table
-    p = pos / intersection
-    n = neg / intersection
+    if intersection == 0:
+        return 0
 
-    p_log = p * math.log2(p)
-    n_log = n * math.log2(n)
+    else:
+        # Calculates the entropy
+        p = pos / intersection
+        n = neg / intersection
 
-    s_entropy = -(p_log + n_log)
+        if p == 0 or p == 1:
+            return 0
 
-    return s_entropy
+        else:
+            p_log = p * math.log2(p)
+            n_log = n * math.log2(n)
+
+            s_entropy = -(p_log + n_log)
+
+            return s_entropy
 
 
 # Calculates either the right or left entropy
@@ -226,19 +234,16 @@ def calculate_side_entropy(O_pos, O_neg, T):
         p = pos / intersection
         n = neg / intersection
 
-        if p > 0:
+        if p == 0 or p == 1:
+            return 0, intersection
+
+        else:
             p_log = p * math.log2(p)
-        else:
-            p_log = 0
-
-        if n > 0:
             n_log = n * math.log2(n)
-        else:
-            n_log = 0
 
-        entropy = -(p_log + n_log)
+            entropy = -(p_log + n_log)
 
-        return entropy, intersection
+            return entropy, intersection
 
 
 # function 4, 5, 6 combined
@@ -277,6 +282,7 @@ def max_predicate(column_values, O_pos, O_neg, T):
         x = information_gain(a, O_pos, O_neg, T)
         predicates_ig.append((a, x))
 
+    print("Predicate gains: ", predicates_ig)
     p = predicates_ig[0]
     pos = 0
     max_pred = p[1]
