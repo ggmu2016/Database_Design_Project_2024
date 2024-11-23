@@ -46,9 +46,6 @@ def information_gain(a, O_pos, O_neg, T):
     s_entropy = calculate_entropy(O_pos, O_neg, T)
     l_entropy, lambda_pos = calculate_side_entropy(O_pos, O_neg, T_pos)
     r_entropy, lambda_neg = calculate_side_entropy(O_pos, O_neg, T_neg)
-
-    if l_entropy is None or r_entropy is None:
-        return 0
     
     # Calculates the information gain
     pos_coefficient = lambda_pos / (lambda_pos + lambda_neg)
@@ -229,12 +226,9 @@ def calculate_side_entropy(O_pos, O_neg, T):
         p = pos / intersection
         n = neg / intersection
 
-        if p > 0 and n > 0:
-            p_log = p * math.log2(p)
-            n_log = n * math.log2(n)
-            entropy = -(p_log + n_log)
-        else: 
-            entropy = None
+        p_log = p * math.log2(p) if p > 0 else 0
+        n_log = n * math.log2(n) if n > 0 else 0
+        entropy = -(p_log + n_log)
 
         return entropy, intersection
 
@@ -271,23 +265,27 @@ def column_values(O_pos, T):
 def max_predicate(column_values, O_pos, O_neg, T):
     predicates_ig = []
 
+    # find the information gains for all of the predicates
     for a in column_values:
         x = information_gain(a, O_pos, O_neg, T)
         predicates_ig.append((a, x))
 
-    p = predicates_ig[0]
-    pos = 0
-    max_pred = p[1]
+    p = predicates_ig[0] # max predicate 
+    # pos = 0
+    # max_ig = p[1] max predicate information gain
 
+    # for i in range(1, len(predicates_ig)):
+    #     p = predicates_ig[i]
+
+    #     if p[1] > max_ig:
+    #         max_ig = p[1]
+    #         pos = i
+    # find the maximum information gain
     for i in range(1, len(predicates_ig)):
-        p = predicates_ig[i]
+        if predicates_ig[i][1] > p[1]:
+            p = predicates_ig[i]
 
-        if p[1] > max_pred:
-            max_pred = p[1]
-            pos = i
-
-    p = predicates_ig[pos]
-
+    # p = predicates_ig[pos]
     return p
 #max predicate 반환값 tuple:
 # predicate[0] is the name of the predicate or what would be equivalent to a
@@ -303,7 +301,6 @@ def intersection(O_tuple, T_content):
                 intersection_tuple.append(o)
 
     return intersection_tuple
-
 
 def DTL(T, N, O_pos, O_neg):
     #(1)
@@ -321,7 +318,7 @@ def DTL(T, N, O_pos, O_neg):
     # (6) 안에서 # (5)도 진행
     maximum_predicate = max_predicate(extracted_predicates, O_pos, O_neg, T)
     condition, info_gain = maximum_predicate
-    print("condition, info_gain: ", condition, info_gain, "\n")
+    # print("condition, info_gain: ", condition, info_gain, "\n")
     if info_gain == 0:
         N.value='?'
         return N
@@ -329,20 +326,26 @@ def DTL(T, N, O_pos, O_neg):
     # (7) (8)
 
     T_pos, T_neg = table_split(condition, O_pos, O_neg, T)
-    print("T_pos: ", T_pos)
-    print("T_neg: ", T_neg)
+    # print("T_pos: ", T_pos)
+    # print("T_neg: ", T_neg)
     N.value = condition
 
     T_pos_content = column_values(O_pos, T_pos)
     T_neg_content = column_values(O_pos, T_neg)
-    print("\ncreating node")
-    print("creatind left node with intersection function: ", intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
-    print("creatind right node with intersection function: ", intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
-    print("N.value: ", N.value)
+    # print("\ncreating node")
+    # print("creatind left node with intersection function: ", intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
+    # print("creatind right node with intersection function: ", intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
+    # print("N.value: ", N.value)
     N.left = DTL(T_pos, DecisionTreeNode(), intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
     N.right = DTL(T_neg, DecisionTreeNode(), intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
     return N
 
+def printTree(N):
+    if N is None:
+        return
+    print(N.value)
+    printTree(N.left)
+    printTree(N.right)
 
 def main():
     # the table is a list of dictionaries: [{"name": abc, "age": 45}, {"name": xyz, "age": 30}......]
@@ -370,6 +373,7 @@ def main():
 
     # column_values = candidate_predicates(T)
     # N.value = max_predicate(column_values, O_pos, O_neg, T)
+    printTree(N)
     return
 
 main()
