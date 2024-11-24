@@ -10,7 +10,7 @@ class DecisionTreeNode:
         self.right = right
 
 # function 1
-def candidate_predicates(T): 
+def candidate_predicates(T):
     # Initialize an empty set A to store the conditions
     A = set()
 
@@ -43,20 +43,20 @@ def information_gain(a, O_pos, O_neg, T):
     T_pos, T_neg = table_split(a, O_pos, O_neg, T)
 
     # Calculates the entropies
-    s_entropy = calculate_entropy(O_pos, O_neg)
-    l_entropy, lambda_pos = calculate_side_entropy(a, O_pos, O_neg, T_pos)
-    r_entropy, lambda_neg = calculate_side_entropy(a, O_pos, O_neg, T_neg)
-
+    s_entropy = calculate_entropy(O_pos, O_neg, T)
+    l_entropy, lambda_pos = calculate_side_entropy(O_pos, O_neg, T_pos)
+    r_entropy, lambda_neg = calculate_side_entropy(O_pos, O_neg, T_neg)
+    
     # Calculates the information gain
     pos_coefficient = lambda_pos / (lambda_pos + lambda_neg)
     neg_coefficient = lambda_neg / (lambda_pos + lambda_neg)
-
+    
     left_entropy = pos_coefficient * l_entropy
     right_entropy = neg_coefficient * r_entropy
 
     information_gain = s_entropy - (left_entropy + right_entropy)
 
-    return information_gain 
+    return information_gain
 
 
 # function 3
@@ -112,42 +112,54 @@ def table_split(a, O_pos, O_neg, T):
 
 
 # Calculates the total entropy
-def calculate_entropy(O_pos, O_neg):
+def calculate_entropy(O_pos, O_neg, T):
     O_pos_content = []
     O_neg_content = []
     O_content = []
+    T_content = []
 
     # Loops through all the entries of the positive tuple and saves its values
     for d in range(0, len(O_pos)):
         for i in O_pos[d]:
             O_pos_content.append(O_pos[d][i])
-            O_content.append(O_pos[d][i])
 
     # Loops through all the entries of the negative tuple and saves its values
     for d in range(0, len(O_neg)):
         for i in O_neg[d]:
             O_neg_content.append(O_neg[d][i])
-            O_content.append(O_neg[d][i])
 
-    o_len = len(O_content) # Union of output positive tuple and outpu negative tuple
+    # All the possible values of the column in that table
+    T_content = column_values(O_pos, T)
+
+    # Union of the output tuples
+    O_content = O_pos_content + O_neg_content
+
+    #o_len = len(O_content) # Union of output positive tuple and outpu negative tuple
     pos = 0
     neg = 0
+    intersection = 0
 
     # Checks if the values in the postive content are in the overall content
     for x in O_pos_content:
-        for o in O_content:
+        for o in T_content:
             if x == o:
                 pos += 1
 
     # Checks if the values in the negative content are in the overall content
     for y in O_neg_content:
-        for o in O_content:
+        for o in T_content:
             if y == o:
                 neg += 1
 
+    # Checks if the values in the negative content are in the overall content
+    for w in O_content:
+        for o in T_content:
+            if w == o:
+                intersection += 1
+
     # Calculates the total entropy of the table
-    p = pos / o_len
-    n = neg / o_len
+    p = pos / intersection
+    n = neg / intersection
 
     p_log = p * math.log2(p)
     n_log = n * math.log2(n)
@@ -158,10 +170,11 @@ def calculate_entropy(O_pos, O_neg):
 
 
 # Calculates either the right or left entropy
-def calculate_side_entropy(a, O_pos, O_neg, T):
+def calculate_side_entropy(O_pos, O_neg, T):
     O_pos_content = []
     O_neg_content = []
     O_content = []
+    T_content = []
 
     # Loops through all the entries of the positive tuple and saves its values
     for d in range(0, len(O_pos)):
@@ -175,38 +188,49 @@ def calculate_side_entropy(a, O_pos, O_neg, T):
             O_neg_content.append(O_neg[d][i])
 
     # All the possible values of the column in that table
-    O_content = column_values(O_pos, T)
+    T_content = column_values(O_pos, T)
 
-    o_len = len(O_content) # Amount of different values in O
-    if o_len == 0:  # Prevent division by zero
-        return 0, 0
+    # Union of the output tuples
+    O_content = O_pos_content + O_neg_content
+
+    #o_len = len(O_content) # Amount of different values in O
+    #if o_len == 0:  # Prevent division by zero
+    #    return 0, 0
     pos = 0
     neg = 0
+    intersection = 0
 
     # Checks if the values in the postive content are in the overall content
     for x in O_pos_content:
-        for o in O_content:
+        for o in T_content:
             if x == o:
                 pos += 1
 
     # Checks if the values in the negative content are in the overall content
     for y in O_neg_content:
-        for o in O_content:
+        for o in T_content:
             if y == o:
                 neg += 1
 
-    # Calculates the entropy
-    p = pos / o_len
-    n = neg / o_len
-    p_log = p * math.log2(p) if p > 0 else 0
-    n_log = n * math.log2(n) if n > 0 else 0
+    # Checks if the values in the union are in the overall content
+    for w in O_content:
+        for o in T_content:
+            if w == o:
+                intersection += 1
 
-    entropy = -(p_log + n_log)
+    if intersection == 0:
+        return 0, intersection
 
-    # Calculates lambda
-    l = pos + neg
+    else:
+        # Calculates the entropy
+        p = pos / intersection
+        n = neg / intersection
 
-    return entropy, l
+        p_log = p * math.log2(p) if p > 0 else 0
+        n_log = n * math.log2(n) if n > 0 else 0
+        entropy = -(p_log + n_log)
+
+        return entropy, intersection
 
 
 # function 4, 5, 6 combined
@@ -240,24 +264,28 @@ def column_values(O_pos, T):
 # function 2 IG function is used in here
 def max_predicate(column_values, O_pos, O_neg, T):
     predicates_ig = []
-    
+
+    # find the information gains for all of the predicates
     for a in column_values:
         x = information_gain(a, O_pos, O_neg, T)
         predicates_ig.append((a, x))
 
-    p = predicates_ig[0]
-    pos = 0
-    max_pred = p[1]
+    p = predicates_ig[0] # max predicate 
+    # pos = 0
+    # max_ig = p[1] max predicate information gain
 
+    # for i in range(1, len(predicates_ig)):
+    #     p = predicates_ig[i]
+
+    #     if p[1] > max_ig:
+    #         max_ig = p[1]
+    #         pos = i
+    # find the maximum information gain
     for i in range(1, len(predicates_ig)):
-        p = predicates_ig[i]
+        if predicates_ig[i][1] > p[1]:
+            p = predicates_ig[i]
 
-        if p[1] > max_pred:
-            max_pred = p[1]
-            pos = i
-
-    p = predicates_ig[pos]
-    
+    # p = predicates_ig[pos]
     return p
 #max predicate 반환값 tuple:
 # predicate[0] is the name of the predicate or what would be equivalent to a
@@ -265,7 +293,7 @@ def max_predicate(column_values, O_pos, O_neg, T):
 
 def intersection(O_tuple, T_content):
     intersection_tuple = []
-    
+
     # Checks for the values that are part of both the output tuple and the table
     for o in O_tuple:
         for key, value in o.items():
@@ -273,7 +301,6 @@ def intersection(O_tuple, T_content):
                 intersection_tuple.append(o)
 
     return intersection_tuple
-
 
 def DTL(T, N, O_pos, O_neg):
     #(1)
@@ -284,35 +311,41 @@ def DTL(T, N, O_pos, O_neg):
     if len(O_neg)==0:
         N.value='✓'
         return N
-    
+
     # (3) (4)
     extracted_predicates = candidate_predicates(T)
-    
+
     # (6) 안에서 # (5)도 진행
     maximum_predicate = max_predicate(extracted_predicates, O_pos, O_neg, T)
     condition, info_gain = maximum_predicate
-    print("condition, info_gain: ", condition, info_gain, "\n")
+    # print("condition, info_gain: ", condition, info_gain, "\n")
     if info_gain == 0:
         N.value='?'
         return N
-    
+
     # (7) (8)
-    
+
     T_pos, T_neg = table_split(condition, O_pos, O_neg, T)
-    print("T_pos: ", T_pos)
-    print("T_neg: ", T_neg)
+    # print("T_pos: ", T_pos)
+    # print("T_neg: ", T_neg)
     N.value = condition
 
     T_pos_content = column_values(O_pos, T_pos)
     T_neg_content = column_values(O_pos, T_neg)
-    print("\ncreating node")
-    print("creatind left node with intersection function: ", intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
-    print("creatind right node with intersection function: ", intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
-    print("N.value: ", N.value)
+    # print("\ncreating node")
+    # print("creatind left node with intersection function: ", intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
+    # print("creatind right node with intersection function: ", intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
+    # print("N.value: ", N.value)
     N.left = DTL(T_pos, DecisionTreeNode(), intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
     N.right = DTL(T_neg, DecisionTreeNode(), intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
     return N
 
+def printTree(N):
+    if N is None:
+        return
+    print(N.value)
+    printTree(N.left)
+    printTree(N.right)
 
 def main():
     # the table is a list of dictionaries: [{"name": abc, "age": 45}, {"name": xyz, "age": 30}......]
@@ -340,6 +373,7 @@ def main():
 
     # column_values = candidate_predicates(T)
     # N.value = max_predicate(column_values, O_pos, O_neg, T)
+    printTree(N)
     return
 
 main()
