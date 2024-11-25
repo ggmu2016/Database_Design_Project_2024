@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, Column, String, Integer, CHAR, ForeignKey,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 
+# Engine for the research paper example data set
 engine = create_engine('postgresql://schooldb_owner:7clNyHJa9vTY@ep-wild-cell-a80798km.eastus2.azure.neon.tech/schooldb?sslmode=require')
 
 
@@ -32,5 +33,6 @@ registration = Table(
     Column("courseID", Integer, primary_key=True, nullable=False),
 ) if "registration" not in metadata.tables else None
 
+# this prevents the tables from being created multiple times in the database
 if registration and major and department:
     metadata.create_all(engine)
