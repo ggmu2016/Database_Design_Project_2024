@@ -6,8 +6,6 @@ class TestLibraFunctions(unittest.TestCase):
     def test_getNextContexts(self):
         context = {"studentID": "Alice", "deptCode": "Comp.", "courseID": 201, "tableName": "registration"}
         result = getNextContexts(context)
-        self.assertIsInstance(result, list)
-        self.assertTrue(all(isinstance(item, dict) for item in result))
         self.assertEqual(result, [
             {'studentID': 'Alice', 'deptCode': 'Chem.', 'tableName': 'major', 'joinCol': 'studentID'},
             {'studentID': 'Bob', 'deptCode': 'Comp.', 'tableName': 'major', 'joinCol': 'deptCode'},
@@ -32,14 +30,13 @@ class TestLibraFunctions(unittest.TestCase):
         size = treeSize(tree)
         self.assertEqual(size, 3)
 
-#TODO: wait for implementation of decision tree
-    # def test_Q(self):
-    #     O_pos = [{"studentID": "Alice"}]
-    #     context = {"studentID": "Alice", "tableName": "registration&department", "joinCol": "deptCode"}
-    #     tree = DecisionTreeNode("deptCode = 'Comp.'", DecisionTreeNode("yes"), DecisionTreeNode("no"))
-    #     query = Q(O_pos, context, tree)
-    #     expected_query = "SELECT studentID FROM registration JOIN department ON registration.deptCode=department.deptCode WHERE deptCode = 'Comp.';"
-    #     self.assertEqual(query, expected_query)
+    def test_Q(self):
+        O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
+        context = {"studentID": "Alice", "deptCode": "Comp.", "courseID": 201, "tableName": "registration&department", "joinCol": "deptCode"}
+        tree = DecisionTreeNode("deptCode = 'Comp.'", DecisionTreeNode("?"), DecisionTreeNode("✓"))
+        query = Q(O_pos, context, tree)
+        expected_query = "SELECT studentID FROM registration JOIN department ON registration.deptCode=department.deptCode WHERE deptCode = 'Comp.';"
+        self.assertEqual(query, expected_query)
 
 if __name__ == '__main__':
     unittest.main()
