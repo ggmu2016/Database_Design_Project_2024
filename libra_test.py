@@ -19,6 +19,21 @@ class TestLibraFunctions(unittest.TestCase):
         self.assertEqual(joined_contexts, {'studentID': 'Alice', 'deptCode': 'Comp.', 'courseID': 201, 'school': 'Engineering', 'tableName': 'registration&department', 'joinCol': 'deptCode'})
         self.assertEqual(joined_colname, 'deptCode')
 
+    def test_joinTwoTables(self):
+        context = {'studentID': 'Alice', 'deptCode': 'Comp.', 'courseID': 201, 'school': 'Engineering', 'tableName': 'registration&department', 'joinCol': 'deptCode'}
+        table = joinTwoTables(context)
+        self.assertEqual(table, [
+            {"studentID": "Alice", "deptCode": "Comp.", "courseID": 201, "school": "Engineering"},
+            {"studentID": "Alice", "deptCode": "Chem.", "courseID": 310, "school": "Arts and Science"},
+            {"studentID": "Alice", "deptCode": "Mech.", "courseID": 550, "school": "Engineering"},
+            {"studentID": "Bob", "deptCode": "Mech.", "courseID": 320, "school": "Engineering"},
+            {"studentID": "Bob", "deptCode": "Mech.", "courseID": 550, "school": "Engineering"},
+            {"studentID": "Charlie", "deptCode": "Chem.", "courseID": 310, "school": "Arts and Science"},
+            {"studentID": "David", "deptCode": "Comp.", "courseID": 500, "school": "Engineering"},
+            {"studentID": "David", "deptCode": "Mech.", "courseID": 502, "school": "Engineering"},
+            {"studentID": "Erin", "deptCode": "Chem.", "courseID": 310, "school": "Arts and Science"},
+        ])
+
 #TODO: wait for the implementation of decision_tree_learning
     # def test_libra(self):
     #     O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
@@ -29,6 +44,9 @@ class TestLibraFunctions(unittest.TestCase):
         tree = DecisionTreeNode(1, DecisionTreeNode(2), DecisionTreeNode(3))
         size = treeSize(tree)
         self.assertEqual(size, 3)
+
+    def test_findEntropy(self):
+        pass
 
     def test_Q(self):
         O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]

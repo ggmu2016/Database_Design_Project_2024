@@ -134,7 +134,7 @@ def joinTwoTables(joined_context):
     table1 = table_names[0]
     if len(table_names)>1:
         table2 = table_names[1]
-        query = f"select * from {table1} join {table2} on {join_key}"
+        query = f"select * from {table1} join {table2} on {table_names[0]}.\"{join_key}\" = {table_names[1]}.\"{join_key}\""
     else:
         query = f"select * from {table1}"
 
