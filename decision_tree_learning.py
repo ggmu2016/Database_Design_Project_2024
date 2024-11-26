@@ -282,7 +282,7 @@ def max_predicate(column_values, O_pos, O_neg, T):
         x = information_gain(a, O_pos, O_neg, T)
         predicates_ig.append((a, x))
 
-    print("Predicate gains: ", predicates_ig)
+    #print("Predicate gains: ", predicates_ig)
     p = predicates_ig[0]
     pos = 0
     max_pred = p[1]
