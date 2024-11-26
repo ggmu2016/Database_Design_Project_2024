@@ -289,7 +289,6 @@ def max_predicate(column_values, O_pos, O_neg, T):
 
     for i in range(1, len(predicates_ig)):
         p = predicates_ig[i]
-
         if p[1] > max_pred:
             max_pred = p[1]
             pos = i
