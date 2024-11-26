@@ -10,7 +10,11 @@ class DecisionTreeNode:
         self.right = right
 
 # function 1
-def candidate_predicates(T):
+def candidate_predicates(T, O_pos):
+    for d in range(0, len(O_pos)):
+        for i in O_pos[d]:
+            col = i
+
     # Initialize an empty set A to store the conditions
     A = set()
 
@@ -19,7 +23,10 @@ def candidate_predicates(T):
         return A  # Return empty set if T is empty
 
     # Get the column names from the first dictionary
-    columns = T[0].keys()
+    columns = []
+    for k in T[0].keys():
+        if k != col:
+            columns.append(k)
 
     for c in columns:
         # Collect unique values for the current column
@@ -41,6 +48,9 @@ def candidate_predicates(T):
 # Calculates the information gain of a specific column of the Table
 def information_gain(a, O_pos, O_neg, T):
     T_pos, T_neg = table_split(a, O_pos, O_neg, T)
+
+    if len(T_pos) == 0 or len(T_neg) == 0:
+        return 0
 
     # Calculates the entropies
     s_entropy = calculate_entropy(O_pos, O_neg, T)
@@ -89,7 +99,6 @@ def table_split(a, O_pos, O_neg, T):
             # Loops through all the entries of the table
             for d in range(0, len(T)):
                 v = T[d][col] # Stores the value of the column of the entry being read
-
                 # If it meets the condition append it to the positive table, if not to the negative table
                 if v < val:
                     T_pos.append(T[d])
@@ -101,7 +110,6 @@ def table_split(a, O_pos, O_neg, T):
             # Loops through all the entries of the table
             for d in range(0, len(T)):
                 v = T[d][col] # Stores the value of the column of the entry being read
-
                 # If it meets the condition append it to the positive table, if not to the negative table
                 if v <= val:
                     T_pos.append(T[d])
@@ -283,27 +291,20 @@ def max_predicate(column_values, O_pos, O_neg, T):
         x = information_gain(a, O_pos, O_neg, T)
         predicates_ig.append((a, x))
 
-    #print("Predicate gains: ", predicates_ig)
+    print("Predicate gains: ", predicates_ig)
     p = predicates_ig[0]
     pos = 0
     max_pred = p[1]
 
-    # for i in range(1, len(predicates_ig)):
-    #     p = predicates_ig[i]
-
-    #     if p[1] > max_ig:
-    #         max_ig = p[1]
-    #         pos = i
-    # find the maximum information gain
     for i in range(1, len(predicates_ig)):
         p = predicates_ig[i]
+
         if p[1] > max_pred:
             max_pred = p[1]
             pos = i
 
     p = predicates_ig[pos]
 
-    # p = predicates_ig[pos]
     return p
 #max predicate 반환값 tuple:
 # predicate[0] is the name of the predicate or what would be equivalent to a
@@ -331,7 +332,7 @@ def DTL(T, N, O_pos, O_neg):
         return N
 
     # (3) (4)
-    extracted_predicates = candidate_predicates(T)
+    extracted_predicates = candidate_predicates(T, O_pos)
 
     # (6) 안에서 # (5)도 진행
     maximum_predicate = max_predicate(extracted_predicates, O_pos, O_neg, T)
@@ -356,6 +357,7 @@ def DTL(T, N, O_pos, O_neg):
     # print("N.value: ", N.value)
     N.left = DTL(T_pos, DecisionTreeNode(), intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
     N.right = DTL(T_neg, DecisionTreeNode(), intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
+
     return N
 
 def printTree(N):
@@ -380,10 +382,7 @@ def main():
         {"studentID": "Erin", "deptCode": "Chem.", "courseID": 310, "school": "Arts and Science"},
     ]
     N = DecisionTreeNode()
-    """
-    O_pos = [{"name": "abc"}]
-    O_neg = [{"name": "xyz"}]
-    """
+
     O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
     O_neg = [{"studentID": "Charlie"}, {"studentID": "David"}]
 
