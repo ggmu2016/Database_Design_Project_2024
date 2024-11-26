@@ -101,31 +101,47 @@ def Q(O_pos, context, tree):
 
     #then obtain the selection predicates from the decision tree
     selectionPredicates = []
-    def obtainSelectionPredicates(node): #traversal algorithm
+    #traversal algorithm that returns a list of the selectionPredicates on the path from the root to a checkmark
+    def obtainSelectionPredicates(node, predicates): 
         if not node:
             return
         # determines if the node is a leaf or a predicate
         if node.value != "?" and node.value != "✓" and node.value != "X":
-            selectionPredicates.append(' '.join(node.value))
-            obtainSelectionPredicates(node.left)
-            obtainSelectionPredicates(node.right)
-    obtainSelectionPredicates(tree)
+            leftPredicates = []
+            rightPredicates = []
+            for predicate in predicates:
+                leftPredicates.append(predicate)
+                rightPredicates.append(predicate)
+            leftPredicates.append(' '.join(node.value))
+
+            if node.value[1] == "==":
+                tempNode = node
+                tempNode.value = (tempNode.value[0], "!=", tempNode.value[2])
+                rightPredicates.append(' '.join(tempNode.value))
+            elif node.value[1] == "<":
+                tempNode = node
+                tempNode.value = (tempNode.value[0], ">=", tempNode.value[2])
+                rightPredicates.append(' '.join(tempNode.value))
+            elif node.value[1] == "<=":
+                tempNode = node
+                tempNode.value = (tempNode.value[0], ">", tempNode.value[2])
+                rightPredicates.append(' '.join(tempNode.value))
+            obtainSelectionPredicates(node.left, leftPredicates)
+            obtainSelectionPredicates(node.right, rightPredicates)
+        elif node.value == "✓":
+            selectionPredicates.append(predicates)
+
+    obtainSelectionPredicates(tree, [])
     #form the query string using the resultant information
     tablesString = ' JOIN '.join(joinTables)
-
-    # Rohit-eliminate duplicate splitting attributes
-    att_set = set()
-    temp = []
-    for i in range(len(selectionPredicates)-1,-1,-1):
-        predicate = selectionPredicates.pop()
-        attribute = predicate[0]
-        if attribute not in att_set:
-            temp.append(predicate)
-        att_set.add(attribute)
-
-    selectionPredicates = temp
-
-    predicateString = ' AND '.join(selectionPredicates)
+    
+    # pick the smallest amount of selection predicates required to reach a checkmark
+    shortestPredicateLength = float("inf")
+    predicateString = ""
+    for i in range(len(selectionPredicates)):
+        if len(selectionPredicates[i]) < shortestPredicateLength:
+            shortestPredicateLength = len(selectionPredicates[i])
+            predicateString = ' AND '.join(selectionPredicates[i])
     queryString = ""
     if len(joinTables) == 2:
         queryString = f"SELECT {selectedAttributes} FROM {tablesString} JOIN ON {joinTables[0]}.{joinAttribute}={joinTables[1]}.{joinAttribute} WHERE {predicateString};"
