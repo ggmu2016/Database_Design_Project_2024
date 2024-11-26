@@ -10,7 +10,7 @@ class DecisionTreeNode:
         self.right = right
 
 # function 1
-def candidate_predicates(T):
+def candidate_predicates(T, main_attribute):
     # Initialize an empty set A to store the conditions
     A = set()
 
@@ -23,6 +23,8 @@ def candidate_predicates(T):
 
     for c in columns:
         # Collect unique values for the current column
+        if c==main_attribute:
+            continue
         unique_values = {row[c] for row in T}
 
         # Check the type of the column based on the first value
@@ -312,8 +314,11 @@ def DTL(T, N, O_pos, O_neg):
         N.value='✓'
         return N
 
+    if O_pos:
+        main_attribute = list(O_pos[0].keys())[0]
+
     # (3) (4)
-    extracted_predicates = candidate_predicates(T)
+    extracted_predicates = candidate_predicates(T, main_attribute)
 
     # (6) 안에서 # (5)도 진행
     maximum_predicate = max_predicate(extracted_predicates, O_pos, O_neg, T)
@@ -360,6 +365,13 @@ def main():
         {"studentID": "David", "deptCode": "Comp.", "courseID": 500, "school": "Engineering"},
         {"studentID": "David", "deptCode": "Mech.", "courseID": 502, "school": "Engineering"},
         {"studentID": "Erin", "deptCode": "Chem.", "courseID": 310, "school": "Arts and Science"},
+    ]
+    T2 = [
+        {"studentID": "Alice", "deptCode": "Chem."},
+        {"studentID": "Bob", "deptCode": "Comp."},
+        {"studentID": "Charlie", "deptCode": "Math."},
+        {"studentID": "David", "deptCode": "Chem."},
+        {"studentID": "Erin", "deptCode": "Mech."},
     ]
     N = DecisionTreeNode()
     """

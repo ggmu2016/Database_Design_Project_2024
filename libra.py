@@ -1,6 +1,7 @@
 import heapq
 from query_to_table import Query2Tuple
 from decision_tree_learning import DTL
+import collections
 # using a dictionary to store overall column names to tables, i.e, {col_name:[table1,...,tableN]}
 columnsInTables = {"studentID": ["registration", "major"], "deptCode": ["registration", "major", "department"],
                    "courseID": ["registration"],
@@ -88,7 +89,7 @@ def treeSize(treeNode):
     return 1 + treeSize(treeNode.left) + treeSize(treeNode.right)
 
 def findEntropy(tree):
-    pass
+    return 0
 
 #given O+, context information, and a tree extract a query
 def Q(O_pos, context, tree):
@@ -111,6 +112,19 @@ def Q(O_pos, context, tree):
     obtainSelectionPredicates(tree)
     #form the query string using the resultant information
     tablesString = ' JOIN '.join(joinTables)
+
+    # Rohit-eliminate duplicate splitting attributes
+    att_set = set()
+    temp = []
+    for i in range(len(selectionPredicates)-1,-1,-1):
+        predicate = selectionPredicates.pop()
+        attribute = predicate[0]
+        if attribute not in att_set:
+            temp.append(predicate)
+        att_set.add(attribute)
+
+    selectionPredicates = temp
+
     predicateString = ' AND '.join(selectionPredicates)
     queryString = ""
     if len(joinTables) == 2:
@@ -176,11 +190,12 @@ def libra(O_pos, O_neg):
 
         joined_table = joinTwoTables(curr_context)
 
-        T = DecisionTreeNode()
-        tree = DTL(joined_table, T, O_pos, O_neg)
-        if treeSize(tree) <= N and findEntropy(tree) == 0:
-            ans = Q(O_pos, curr_context, tree)
-            N = treeSize(tree)
+        root = DecisionTreeNode()
+        DTL(joined_table, root, O_pos, O_neg)
+        tree_size = treeSize(root)
+        if tree_size <= N and findEntropy(root) == 0:
+            ans = Q(O_pos, curr_context, root)
+            N = tree_size
 
     return ans
 
