@@ -53,6 +53,7 @@ def information_gain(a, O_pos, O_neg, T):
         return 0
 
     # Calculates the entropies
+    print(a)
     s_entropy = calculate_entropy(O_pos, O_neg, T)
     l_entropy, lambda_pos = calculate_side_entropy(O_pos, O_neg, T_pos)
     r_entropy, lambda_neg = calculate_side_entropy(O_pos, O_neg, T_neg)
@@ -180,6 +181,8 @@ def calculate_entropy(O_pos, O_neg, T):
             p_log = p * math.log2(p)
             n_log = n * math.log2(n)
 
+            print(p_log, n_log)
+
             s_entropy = -(p_log + n_log)
 
             return s_entropy
@@ -288,8 +291,8 @@ def max_predicate(column_values, O_pos, O_neg, T):
 
     # find the information gains for all of the predicates
     for a in column_values:
-        x = information_gain(a, O_pos, O_neg, T)
-        predicates_ig.append((a, x))
+        ig = information_gain(a, O_pos, O_neg, T)
+        predicates_ig.append((a, ig))
 
     print("Predicate gains: ", predicates_ig)
     p = predicates_ig[0]
@@ -337,6 +340,7 @@ def DTL(T, N, O_pos, O_neg):
     # (6) 안에서 # (5)도 진행
     maximum_predicate = max_predicate(extracted_predicates, O_pos, O_neg, T)
     condition, info_gain = maximum_predicate
+
     # print("condition, info_gain: ", condition, info_gain, "\n")
     if info_gain == 0:
         N.value='?'
