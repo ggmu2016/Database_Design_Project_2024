@@ -388,7 +388,7 @@ def main():
     O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
     O_neg = [{"studentID": "Charlie"}, {"studentID": "David"}]
 
-    global_DTL(T, N, O_pos, O_neg)
+    global_DTL(T2, N, O_pos, O_neg)
 
     # column_values = candidate_predicates(T)
     # N.value = max_predicate(column_values, O_pos, O_neg, T)
