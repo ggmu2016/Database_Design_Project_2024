@@ -137,13 +137,19 @@ def Q(O_pos, context, tree):
 
     obtainSelectionPredicates(tree, [])
     #form the query string using the resultant information
-    tablesString = ' JOIN '.join(joinTables)
-    predicateString = ' AND '.join(selectionPredicates)
-    queryString = ""
-    if len(joinTables) == 2:
-        queryString = f"SELECT {selectedAttributes} FROM {tablesString} JOIN ON {joinTables[0]}.{joinAttribute}={joinTables[1]}.{joinAttribute} WHERE {predicateString};"
-    else: 
-        queryString = f"SELECT {selectedAttributes} FROM {tablesString} WHERE {predicateString};"
+    tablesString = f'{joinTables[0]}'
+    for table in range(1, len(joinTables)):
+        # join attribute should allow multiple values but we don't have that at this moment
+        tablesString += f' JOIN {joinTables[table]} ON {joinTables[table - 1]}.{joinAttribute} = {joinTables[table]}.{joinAttribute}'
+    
+    # pick the smallest amount of selection predicates required to reach a checkmark
+    shortestPredicateLength = float("inf")
+    predicateString = ""
+    for i in range(len(selectionPredicates)):
+        if len(selectionPredicates[i]) < shortestPredicateLength:
+            shortestPredicateLength = len(selectionPredicates[i])
+            predicateString = ' AND '.join(selectionPredicates[i])
+    queryString = f"SELECT {selectedAttributes} FROM {tablesString} WHERE {predicateString};"
     return queryString
 
 def joinTwoTables(joined_context):
@@ -270,30 +276,30 @@ def main():
     majorTable = Query2Tuple('SELECT * FROM major')
     registrationTable = Query2Tuple('SELECT * FROM registration')
 
-    print(departmentTable)
-    print(majorTable)
-    print(registrationTable)
+    #print(departmentTable)
+    #print(majorTable)
+    #print(registrationTable)
 
-    positiveQuery = Query2Tuple(
-        'SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = \'Engineering\'')
-    O_pos = set()
-    for row in positiveQuery:
-        O_pos.add(tuple(row))
-    O_pos = list(O_pos)
-    
-    negativeQuery = Query2Tuple(
-        'SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" >= 500 OR department."school" != \'Engineering\'')
-    O_neg = set()
-    for row in negativeQuery:
-        if tuple(row) not in O_pos:
-            O_neg.add(tuple(row))
-    O_neg = list(O_neg)
-    
-    print(O_pos)
-    print(O_neg)
+    # positiveQuery = Query2Tuple(
+    #     'SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = \'Engineering\'')
+    # O_pos = set()
+    # for row in positiveQuery:
+    #     O_pos.add(tuple(row))
+    # O_pos = list(O_pos)
+    #
+    # negativeQuery = Query2Tuple(
+    #     'SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" >= 500 OR department."school" != \'Engineering\'')
+    # O_neg = set()
+    # for row in negativeQuery:
+    #     if tuple(row) not in O_pos:
+    #         O_neg.add(tuple(row))
+    # O_neg = list(O_neg)
+    #
+    # print(O_pos)
+    # print(O_neg)
 
-    libra(O_pos, O_neg)
+    #libra(O_pos, O_neg)
 
 
 
-# main()
+main()
