@@ -3,9 +3,9 @@ from query_to_table import Query2Tuple
 from decision_tree_learning import global_DTL, printTree
 import collections
 # using a dictionary to store overall column names to tables, i.e, {col_name:[table1,...,tableN]}
-columnsInTables = {"studentID": ["registration", "major"], "deptCode": ["registration", "major", "department"],
-                   "courseID": ["registration"],
-                   "school": ["department"]}
+columnsInTables = {"teamID": ["teams"], "name": ["teams", "players"], "city": ["teams"], "stadium": ["teams"],
+                "playerID": ["players"], "position": ["players"], "age": ["players"], "teamID": ["players"],
+                "matchID": ["matches"], "homeTeamID": ["matches"], "awayTeamID": ["matches"], "matchDate": ["matches"], "homeScore": ["matches"], "awayScore": ["matches"]}
 
 
 def getNextContexts(context):
@@ -31,7 +31,7 @@ def getNextContexts(context):
         for table in columnsInTables[c]:
             if table not in tables:
                 query = f"select * from {table} where \"{c}\" = '{context[c]}'"
-                res = Query2Tuple(query)
+                res = Query2Tuple(query, large=True)
                 if res:
                     # add table name to each dictionary
                     for i in range(len(res)):
@@ -172,7 +172,7 @@ def joinTwoTables(joined_context):
     else:
         query = f"select * from {table1}"
 
-    res = Query2Tuple(query)
+    res = Query2Tuple(query, large=True)
     return res
 
     # maybe save this result somewhere??
@@ -226,11 +226,11 @@ def libra(O_pos, O_neg):
             continue
         visited_tables.add(curr_context["tableName"])
         joined_table = joinTwoTables(curr_context)
-        print("WHO MADE IT")
-        print(curr_context)
+        # print("WHO MADE IT")
+        # print(curr_context)
         root = DecisionTreeNode()
         global_DTL(joined_table, root, O_pos, O_neg)
-        printTree(root)
+        # printTree(root)
         tree_size = treeSize(root)
         if runQ(root, N, ans):#tree_size <= N and findEntropy(root) == 0:
             ans = Q(O_pos, curr_context, root)
@@ -256,11 +256,11 @@ def main():
 
     # ========================================================================================================
 
-    # ============= testing Libra =====================================================================
-    O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
-    O_neg = [{"studentID": "Charlie"}, {"studentID": "David"}]
-    res = libra(O_pos,O_neg)
-    print(res)
+    # # ============= testing Libra =====================================================================
+    # O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
+    # O_neg = [{"studentID": "Charlie"}, {"studentID": "David"}]
+    # res = libra(O_pos,O_neg)
+    # print(res)
     # ========================================================================================================
 
 
