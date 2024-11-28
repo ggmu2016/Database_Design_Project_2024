@@ -153,13 +153,19 @@ def calculate_entropy(O_pos, O_neg, T):
             if y == o:
                 neg += 1
 
-    # Checks if the values in the negative content are in the overall content
+    # Checks if the values in the content are in the overall content
     for w in O_content:
         for o in T_content:
             if w == o:
                 intersection += 1
 
     # Calculates the total entropy of the table
+    if intersection == 0:
+        print("O_pos: ", O_pos)
+        print("O_neg: ", O_neg)
+        print("T: ", T)
+        raise ValueError("Intersection is zero, cannot calculate entropy.")
+    
     p = pos / intersection
     n = neg / intersection
 
@@ -305,6 +311,9 @@ def intersection(O_tuple, T_content):
     return intersection_tuple
 
 def global_DTL(T, N, O_pos, O_neg):
+    # print("T: ", T)
+    # print("O_pos: ", O_pos)
+    # print("O_neg: ", O_neg)
     O_question = O_pos
 
     def DTL(T, N, O_pos, O_neg):
@@ -395,4 +404,4 @@ def main():
     printTree(N)
     return
 
-main()
+# main()

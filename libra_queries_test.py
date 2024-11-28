@@ -18,30 +18,30 @@ class TestQueryToTable(unittest.TestCase):
         ]
     # TODO: figure out O_neg
 
-    # def test_query0(self):
+: # works
     #     O_pos = Query2TupleLarge(self.queries[0])
     #     O_neg = []
     #     self.assertEqual(self.queries[0], libra(O_pos, O_neg))
 
-    # def test_query1(self):
+    # def test_query1(self): # works
     #     O_pos = Query2TupleLarge(self.queries[1])
     #     O_neg = []
     #     self.assertEqual(self.queries[1], libra(O_pos, O_neg))
 
-    # def test_query2(self):
+    # def test_query2(self): # works
     #     O_pos = Query2TupleLarge(self.queries[2])
     #     O_neg = []
     #     self.assertEqual(self.queries[2], libra(O_pos, O_neg))
     
-    # def test_query3(self): 
+    # def test_query3(self): # works
     #     O_pos = Query2TupleLarge(self.queries[3])
     #     O_neg = Query2TupleLarge("SELECT name FROM teams WHERE city!='Dylanside'")
     #     self.assertEqual(self.queries[3], libra(O_pos, O_neg))
     
-    # def test_query4(self): # returns None
-    #     O_pos = Query2TupleLarge(self.queries[4])
-    #     O_neg = Query2TupleLarge("SELECT players.name FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" WHERE teams.city != 'Dylanside';")
-    #     self.assertEqual(self.queries[4], libra(O_pos, O_neg))
+    def test_query4(self): # division by 0 error
+        O_pos = Query2TupleLarge(self.queries[4])
+        O_neg = Query2TupleLarge("SELECT players.name FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" WHERE teams.city != 'Dylanside';")
+        self.assertEqual(self.queries[4], libra(O_pos, O_neg))
     
     # def test_query5(self): # division by 0 error
     #     O_pos = Query2TupleLarge(self.queries[5])

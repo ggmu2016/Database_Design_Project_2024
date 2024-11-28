@@ -3,8 +3,8 @@ from query_to_table import Query2Tuple
 from decision_tree_learning import global_DTL, printTree
 import collections
 # using a dictionary to store overall column names to tables, i.e, {col_name:[table1,...,tableN]}
-columnsInTables = {"teamID": ["teams"], "name": ["teams", "players"], "city": ["teams"], "stadium": ["teams"],
-                "playerID": ["players"], "position": ["players"], "age": ["players"], "teamID": ["players"],
+columnsInTables = {"teamID": ["teams", "players"], "name": ["teams", "players"], "city": ["teams"], "stadium": ["teams"],
+                "playerID": ["players"], "position": ["players"], "age": ["players"],
                 "matchID": ["matches"], "homeTeamID": ["matches"], "awayTeamID": ["matches"], "matchDate": ["matches"], "homeScore": ["matches"], "awayScore": ["matches"]}
 
 
@@ -226,11 +226,11 @@ def libra(O_pos, O_neg):
             continue
         visited_tables.add(curr_context["tableName"])
         joined_table = joinTwoTables(curr_context)
-        # print("WHO MADE IT")
-        # print(curr_context)
+        print("WHO MADE IT")
+        print(curr_context)
         root = DecisionTreeNode()
         global_DTL(joined_table, root, O_pos, O_neg)
-        # printTree(root)
+        printTree(root)
         tree_size = treeSize(root)
         if runQ(root, N, ans):#tree_size <= N and findEntropy(root) == 0:
             ans = Q(O_pos, curr_context, root)
