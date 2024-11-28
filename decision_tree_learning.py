@@ -304,46 +304,52 @@ def intersection(O_tuple, T_content):
 
     return intersection_tuple
 
-def DTL(T, N, O_pos, O_neg):
-    #(1)
-    if len(O_pos)==0:
-        N.value='X'
+def global_DTL(T, N, O_pos, O_neg):
+    O_question = O_pos
+
+    def DTL(T, N, O_pos, O_neg):
+        nonlocal O_question
+        #(1)
+        if len(O_pos)==0:
+            N.value='X'
+            return N
+        #(2)
+        if len(O_neg)==0:
+            N.value='✓' if O_pos==O_question else 'X'
+            return N
+
+        if O_pos:
+            main_attribute = list(O_pos[0].keys())[0]
+
+        # (3) (4)
+        extracted_predicates = candidate_predicates(T, main_attribute)
+
+        # (6) 안에서 # (5)도 진행
+        maximum_predicate = max_predicate(extracted_predicates, O_pos, O_neg, T)
+        condition, info_gain = maximum_predicate
+        # print("condition, info_gain: ", condition, info_gain, "\n")
+        if info_gain == 0:
+            N.value='?'
+            return N
+
+        # (7) (8)
+
+        T_pos, T_neg = table_split(condition, O_pos, O_neg, T)
+        # print("T_pos: ", T_pos)
+        # print("T_neg: ", T_neg)
+        N.value = condition
+
+        T_pos_content = column_values(O_pos, T_pos)
+        T_neg_content = column_values(O_pos, T_neg)
+
+        # print("\ncreating node")
+        # print("creatind left node with intersection function: ", intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
+        # print("creatind right node with intersection function: ", intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
+        # print("N.value: ", N.value)
+        N.left = DTL(T_pos, DecisionTreeNode(), intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
+        N.right = DTL(T_neg, DecisionTreeNode(), intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
         return N
-    #(2)
-    if len(O_neg)==0:
-        N.value='✓'
-        return N
-
-    if O_pos:
-        main_attribute = list(O_pos[0].keys())[0]
-
-    # (3) (4)
-    extracted_predicates = candidate_predicates(T, main_attribute)
-
-    # (6) 안에서 # (5)도 진행
-    maximum_predicate = max_predicate(extracted_predicates, O_pos, O_neg, T)
-    condition, info_gain = maximum_predicate
-    # print("condition, info_gain: ", condition, info_gain, "\n")
-    if info_gain == 0:
-        N.value='?'
-        return N
-
-    # (7) (8)
-
-    T_pos, T_neg = table_split(condition, O_pos, O_neg, T)
-    # print("T_pos: ", T_pos)
-    # print("T_neg: ", T_neg)
-    N.value = condition
-
-    T_pos_content = column_values(O_pos, T_pos)
-    T_neg_content = column_values(O_pos, T_neg)
-    # print("\ncreating node")
-    # print("creatind left node with intersection function: ", intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
-    # print("creatind right node with intersection function: ", intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
-    # print("N.value: ", N.value)
-    N.left = DTL(T_pos, DecisionTreeNode(), intersection(O_pos, T_pos_content), intersection(O_neg, T_pos_content))
-    N.right = DTL(T_neg, DecisionTreeNode(), intersection(O_pos, T_neg_content), intersection(O_neg, T_neg_content))
-    return N
+    return DTL(T, N, O_pos, O_neg)
 
 def printTree(N):
     if N is None:
@@ -374,6 +380,7 @@ def main():
         {"studentID": "Erin", "deptCode": "Mech."},
     ]
     N = DecisionTreeNode()
+    N2 = DecisionTreeNode()
     """
     O_pos = [{"name": "abc"}]
     O_neg = [{"name": "xyz"}]
@@ -381,7 +388,7 @@ def main():
     O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
     O_neg = [{"studentID": "Charlie"}, {"studentID": "David"}]
 
-    DTL(T, N, O_pos, O_neg)
+    global_DTL(T2, N, O_pos, O_neg)
 
     # column_values = candidate_predicates(T)
     # N.value = max_predicate(column_values, O_pos, O_neg, T)

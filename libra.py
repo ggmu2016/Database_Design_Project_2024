@@ -1,6 +1,6 @@
 import heapq
 from query_to_table import Query2Tuple
-from decision_tree_learning import DTL
+from decision_tree_learning import global_DTL
 import collections
 # using a dictionary to store overall column names to tables, i.e, {col_name:[table1,...,tableN]}
 columnsInTables = {"studentID": ["registration", "major"], "deptCode": ["registration", "major", "department"],
@@ -207,7 +207,7 @@ def libra(O_pos, O_neg):
         joined_table = joinTwoTables(curr_context)
 
         root = DecisionTreeNode()
-        DTL(joined_table, root, O_pos, O_neg)
+        global_DTL(joined_table, root, O_pos, O_neg)
         tree_size = treeSize(root)
         if tree_size <= N and findEntropy(root) == 0:
             ans = Q(O_pos, curr_context, root)
