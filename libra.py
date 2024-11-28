@@ -1,6 +1,7 @@
 import heapq
 from query_to_table import Query2Tuple
-from decision_tree_learning import DTL
+from decision_tree_learning import global_DTL, printTree
+import collections
 # using a dictionary to store overall column names to tables, i.e, {col_name:[table1,...,tableN]}
 columnsInTables = {"studentID": ["registration", "major"], "deptCode": ["registration", "major", "department"],
                    "courseID": ["registration"],
@@ -88,7 +89,11 @@ def treeSize(treeNode):
     return 1 + treeSize(treeNode.left) + treeSize(treeNode.right)
 
 def findEntropy(tree):
-    pass
+    return 0
+
+#converts each item in the tuple to a string so that we can run .join() on the tuple
+def stringifyTuple(inputTuple):
+    return (str(x) for x in inputTuple)
 
 #given O+, context information, and a tree extract a query
 def Q(O_pos, context, tree):
@@ -100,21 +105,43 @@ def Q(O_pos, context, tree):
 
     #then obtain the selection predicates from the decision tree
     selectionPredicates = []
-    def obtainSelectionPredicates(node): #traversal algorithm
+    #traversal algorithm that returns a list of the selectionPredicates on the path from the root to a checkmark
+    def obtainSelectionPredicates(node, predicates): 
         if not node:
             return
         # determines if the node is a leaf or a predicate
         if node.value != "?" and node.value != "✓" and node.value != "X":
-            selectionPredicates.append(node.value)
-            obtainSelectionPredicates(node.left)
-            obtainSelectionPredicates(node.right)
-    obtainSelectionPredicates(tree)
+            leftPredicates = []
+            rightPredicates = []
+            for predicate in predicates:
+                leftPredicates.append(predicate)
+                rightPredicates.append(predicate)
+            leftPredicates.append(' '.join(stringifyTuple(node.value)))
+
+            if node.value[1] == "==":
+                tempNode = node
+                tempNode.value = (tempNode.value[0], "!=", tempNode.value[2])
+                rightPredicates.append(' '.join(stringifyTuple(tempNode.value)))
+            elif node.value[1] == "<":
+                tempNode = node
+                tempNode.value = (tempNode.value[0], ">=", tempNode.value[2])
+                rightPredicates.append(' '.join(stringifyTuple(tempNode.value)))
+            elif node.value[1] == "<=":
+                tempNode = node
+                tempNode.value = (tempNode.value[0], ">", tempNode.value[2])
+                rightPredicates.append(' '.join(stringifyTuple(tempNode.value)))
+            obtainSelectionPredicates(node.left, leftPredicates)
+            obtainSelectionPredicates(node.right, rightPredicates)
+        elif node.value == "✓":
+            selectionPredicates.append(predicates)
+
+    obtainSelectionPredicates(tree, [])
     #form the query string using the resultant information
     tablesString = ' JOIN '.join(joinTables)
     predicateString = ' AND '.join(selectionPredicates)
     queryString = ""
     if len(joinTables) == 2:
-        queryString = f"SELECT {selectedAttributes} FROM {tablesString} ON {joinTables[0]}.{joinAttribute}={joinTables[1]}.{joinAttribute} WHERE {predicateString};"
+        queryString = f"SELECT {selectedAttributes} FROM {tablesString} JOIN ON {joinTables[0]}.{joinAttribute}={joinTables[1]}.{joinAttribute} WHERE {predicateString};"
     else: 
         queryString = f"SELECT {selectedAttributes} FROM {tablesString} WHERE {predicateString};"
     return queryString
@@ -134,7 +161,8 @@ def joinTwoTables(joined_context):
     table1 = table_names[0]
     if len(table_names)>1:
         table2 = table_names[1]
-        query = f"select * from {table1} join {table2} on {table_names[0]}.\"{join_key}\" = {table_names[1]}.\"{join_key}\""
+        #this query string needs to be modified to join more than 2 tables
+        query = f'select * from {table1} join {table2} on {table1}."{join_key}" = {table2}."{join_key}"' #we need join_key to allow multiple values
     else:
         query = f"select * from {table1}"
 
@@ -143,6 +171,24 @@ def joinTwoTables(joined_context):
 
     # maybe save this result somewhere??
 
+def checkMarkExists(node):
+    if not node:
+        return False
+    if node.value == "✓":
+        return True
+    return checkMarkExists(node.left) or checkMarkExists(node.right)
+
+def runQ(root, N, ans):
+    tree_size = treeSize(root)
+    cmExists = checkMarkExists(root)
+    # if we still don't have an answer then just run it regardless of size conditions
+    if ans == None and cmExists:
+        return True
+    # if the tree doesn't have a checkmark then skip the context
+    if not cmExists:
+        return False
+    # If there is a checkmark and we have a valid answer then check the conditions as we normally would
+    return tree_size <= N and findEntropy(root) == 0
 
 def libra(O_pos, O_neg):
     """
@@ -168,19 +214,21 @@ def libra(O_pos, O_neg):
         for context in next_contexts:
             (joined_context, common_column) = joinContexts(curr_context.copy(), context)
             if "tableName" in joined_context and joined_context!=curr_context and joined_context["tableName"] not in visited_tables:
-                visited_tables.add(joined_context["tableName"])
                 L.append(joined_context)
 
         if len(curr_context) > N or curr_context["tableName"] in visited_tables:
             continue
-
+        visited_tables.add(curr_context["tableName"])
         joined_table = joinTwoTables(curr_context)
-
-        T = DecisionTreeNode()
-        tree = DTL(joined_table, T, O_pos, O_neg)
-        if treeSize(tree) <= N and findEntropy(tree) == 0:
-            ans = Q(O_pos, curr_context, tree)
-            N = treeSize(tree)
+        print("WHO MADE IT")
+        print(curr_context)
+        root = DecisionTreeNode()
+        global_DTL(joined_table, root, O_pos, O_neg)
+        printTree(root)
+        tree_size = treeSize(root)
+        if runQ(root, N, ans):#tree_size <= N and findEntropy(root) == 0:
+            ans = Q(O_pos, curr_context, root)
+            N = tree_size
 
     return ans
 
