@@ -116,7 +116,11 @@ def Q(O_pos, context, tree):
             for predicate in predicates:
                 leftPredicates.append(predicate)
                 rightPredicates.append(predicate)
-            leftPredicates.append(' '.join(stringifyTuple(node.value)))
+            
+            if (node.value[1] == "=="):
+                leftPredicates.append(' '.join(stringifyTuple((node.value[0], "=", node.value[2]))))
+            else:
+                leftPredicates.append(' '.join(stringifyTuple(node.value)))
 
             if node.value[1] == "==":
                 tempNode = node
@@ -149,7 +153,7 @@ def Q(O_pos, context, tree):
         if len(selectionPredicates[i]) < shortestPredicateLength:
             shortestPredicateLength = len(selectionPredicates[i])
             predicateString = ' AND '.join(selectionPredicates[i])
-    queryString = f"SELECT {selectedAttributes} FROM {tablesString} WHERE {predicateString};"
+    queryString = f"SELECT {selectedAttributes} FROM {tablesString} WHERE {predicateString};" if predicateString != "" else f"SELECT {selectedAttributes} FROM {tablesString};"
     return queryString
 
 def joinTwoTables(joined_context):
@@ -226,11 +230,8 @@ def libra(O_pos, O_neg):
             continue
         visited_tables.add(curr_context["tableName"])
         joined_table = joinTwoTables(curr_context)
-        print("WHO MADE IT")
-        print(curr_context)
         root = DecisionTreeNode()
         global_DTL(joined_table, root, O_pos, O_neg)
-        printTree(root)
         tree_size = treeSize(root)
         if runQ(root, N, ans):#tree_size <= N and findEntropy(root) == 0:
             ans = Q(O_pos, curr_context, root)
