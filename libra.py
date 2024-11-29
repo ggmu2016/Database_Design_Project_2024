@@ -1,4 +1,6 @@
 import heapq
+import math
+
 from query_to_table import Query2Tuple
 from decision_tree_learning import global_DTL, printTree
 import collections
@@ -10,6 +12,8 @@ columnsInTables = {"studentID": ["registration", "major"], "deptCode": ["registr
 
 def getNextContexts(context):
     """
+    Gets next contexts from given contexts. Goes through all columns and all tables NOT in the input context.
+    Adds a couple of keys to each dictionary, "tableName" and "joinCol"
     Args:
         context: a python dictionary, such as: {"studentID": "Alice"}
         table_name: set of names of tables where context is from, such as ["registration"]
@@ -68,7 +72,7 @@ def joinContexts(context1, context2):
 
     # rename tableName to joint table name
     if commonKey:
-        joinedContext["tableName"]= context1["tableName"] + "&" + context2["tableName"]
+        joinedContext["tableName"] = context1["tableName"] + "&" + context2["tableName"]
         joinedContext["joinCol"] = commonKey
 
 
@@ -88,8 +92,6 @@ def treeSize(treeNode):
         return 0
     return 1 + treeSize(treeNode.left) + treeSize(treeNode.right)
 
-def findEntropy(tree):
-    return 0
 
 #converts each item in the tuple to a string so that we can run .join() on the tuple
 def stringifyTuple(inputTuple):
@@ -167,19 +169,23 @@ def joinTwoTables(joined_context):
     """
     # creates the join table from T1 and T2 and saves it in the database for easy access
     table_names = joined_context["tableName"].split('&')
-    join_key = joined_context["joinCol"]
+    join_keys = joined_context["joinCol"].split('&')
     table1 = table_names[0]
-    if len(table_names)>1:
+    if len(table_names)==1:
+        query = f'select * from {table1}'
+    elif len(table_names)==2:
         table2 = table_names[1]
         #this query string needs to be modified to join more than 2 tables
-        query = f'select * from {table1} join {table2} on {table1}."{join_key}" = {table2}."{join_key}"' #we need join_key to allow multiple values
+        query = f'select * from {table1} join {table2} on {table1}."{join_keys[0]}" = {table2}."{join_keys[0]}"' #we need join_key to allow multiple values
     else:
-        query = f"select * from {table1}"
+        table_prev = table_names[0]
+        query = f'select * from {table_prev}'
+        for idx, table in enumerate(table_names[1:]):
+            query += f' join {table} on {table_prev}."{join_keys[idx-1]}"={table}."{join_keys[idx-1]}"'
+            table_prev = table
 
     res = Query2Tuple(query)
     return res
-
-    # maybe save this result somewhere??
 
 def checkMarkExists(node):
     if not node:
@@ -198,7 +204,7 @@ def runQ(root, N, ans):
     if not cmExists:
         return False
     # If there is a checkmark and we have a valid answer then check the conditions as we normally would
-    return tree_size <= N and findEntropy(root) == 0
+    return tree_size <= N
 
 def libra(O_pos, O_neg):
     """
@@ -206,8 +212,6 @@ def libra(O_pos, O_neg):
     Args:
         O_pos:
         O_neg:
-        N:
-
     Returns:
 
     """
@@ -223,7 +227,16 @@ def libra(O_pos, O_neg):
         next_contexts = getNextContexts(curr_context.copy())
         for context in next_contexts:
             (joined_context, common_column) = joinContexts(curr_context.copy(), context)
-            if "tableName" in joined_context and joined_context!=curr_context and joined_context["tableName"] not in visited_tables:
+
+            # if theres only two tables joined we just need one joinCol
+            num_tablesJoined = len(joined_context["tableName"].split("&"))
+            if num_tablesJoined<=2:
+                joined_context["joinCol"] = common_column
+            else:
+                joined_context["joinCol"] += f'&{common_column}'
+
+            if "tableName" in joined_context and joined_context!=curr_context and curr_context["tableName"] not in visited_tables:
+                #visited_tables.add(joined_context["tableName"])
                 L.append(joined_context)
 
         if len(curr_context) > N or curr_context["tableName"] in visited_tables:
@@ -242,7 +255,7 @@ def libra(O_pos, O_neg):
 def main():
 
     # ============= testing getNextContexts ===================================================================
-    context = {"studentID": "Alice", "deptCode": "Comp.", "courseID": 201, "tableName": "registration"}
+    context = {"studentID": "Alice", "deptCode": "Comp.", "courseID": 201, "tableName": "registration&major"}
     #result = getNextContexts(context)
     #print(result)      # returns list of dictionaries
 
