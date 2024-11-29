@@ -18,7 +18,7 @@ class TestQueryToTable(unittest.TestCase):
         ]
     # TODO: figure out O_neg
 
-: # works
+    # def test_query0(self): # works
     #     O_pos = Query2TupleLarge(self.queries[0])
     #     O_neg = []
     #     self.assertEqual(self.queries[0], libra(O_pos, O_neg))
