@@ -121,6 +121,8 @@ def Q(O_pos, context, tree):
             return
         # determines if the node is a leaf or a predicate
         if node.value != "?" and node.value != "✓" and node.value != "X":
+            if type(node.value[2]) != int:
+                node.value = (node.value[0], node.value[1], '"' + str(node.value[2]) + '"')
             leftPredicates = []
             rightPredicates = []
             for predicate in predicates:
