@@ -154,7 +154,7 @@ def Q(O_pos, context, tree):
     tablesString = f'{joinTables[0]}'
     for table in range(1, len(joinTables)):
         # join attribute should allow multiple values but we don't have that at this moment
-        tablesString += f' JOIN {joinTables[table]} ON {joinTables[table - 1]}.{joinAttribute} = {joinTables[table]}.{joinAttribute}'
+        tablesString += f' JOIN {joinTables[table]} ON {joinTables[table - 1]}."{joinAttribute}" = {joinTables[table]}."{joinAttribute}"'
     
     # pick the smallest amount of selection predicates required to reach a checkmark
     shortestPredicateLength = float("inf")
