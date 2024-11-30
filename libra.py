@@ -5,12 +5,13 @@ from query_to_table import Query2Tuple
 from decision_tree_learning import global_DTL, printTree
 import collections
 # using a dictionary to store overall column names to tables, i.e, {col_name:[table1,...,tableN]}
-columnsInTables = {"teamID": ["teams", "players"], "name": ["teams", "players"], "city": ["teams"], "stadium": ["teams"],
-                "playerID": ["players"], "position": ["players"], "age": ["players"],
-                "matchID": ["matches"], "homeTeamID": ["matches"], "awayTeamID": ["matches"], "matchDate": ["matches"], "homeScore": ["matches"], "awayScore": ["matches"]}
+columnsInTables = {"teamID": ["teams", "players", "merchandise"], "city": ["teams"], "stadium": ["teams"], "teamName": ["teams"],
+                "playerID": ["players"], "position": ["players"], "age": ["players"], "playerName": ["players"], 
+                "matchID": ["matches"], "homeTeamID": ["matches"], "awayTeamID": ["matches"], "matchDate": ["matches"], "homeScore": ["matches"], "awayScore": ["matches"],
+                "merchandiseType": ["merchandise"], "price": ["merchandise"]}
 
 
-def getNextContexts(context):
+def getNextContexts(context, init=False):
     """
     Gets next contexts from given contexts. Goes through all columns and all tables NOT in the input context.
     Adds a couple of keys to each dictionary, "tableName" and "joinCol"
@@ -44,6 +45,13 @@ def getNextContexts(context):
                         res_dict['tableName'] = table
                         res_dict['joinCol'] = c
                         nextContexts.append(res_dict)
+    
+    if init and len(context.keys()) > 1:
+        acc = nextContexts[0]
+        for i in range(len(nextContexts)):
+            if nextContexts[i]['tableName'] not in acc['tableName'] and nextContexts[i]['joinCol'] != acc['joinCol']:
+                acc = joinContexts(acc, nextContexts[i])[0]
+        nextContexts = [acc]
     return nextContexts
 
 
@@ -61,13 +69,13 @@ def joinContexts(context1, context2):
     joinedContext = context1   # dictionary
     commonKey = None
     for key in context1.keys():
-        if key in context2 and context1[key]==context2[key] and context1['tableName']!=context2['tableName']:
+        if key in context2.keys() and context1[key]==context2[key] and context1['tableName']!=context2['tableName']:
             commonKey = key
             break
 
     # join the dicts together
     for key, val in context2.items():
-        if commonKey and key!=commonKey and key not in context1 and key!="tableName":
+        if commonKey and key!=commonKey and key not in context1.keys() and key!="tableName":
             joinedContext[key] = val
 
     # rename tableName to joint table name
@@ -217,7 +225,7 @@ def libra(O_pos, O_neg):
     """
     N = float("inf")
     init_context = O_pos[0]
-    next_contexts = getNextContexts(init_context) # list of dictionaries
+    next_contexts = getNextContexts(init_context, init=True) # list of dictionaries
     L = next_contexts.copy()
     visited_tables = set()
     ans = None
@@ -241,10 +249,14 @@ def libra(O_pos, O_neg):
 
         if len(curr_context) > N or curr_context["tableName"] in visited_tables:
             continue
+
+        print("WHO MADE IT")
+        print(curr_context)
         visited_tables.add(curr_context["tableName"])
         joined_table = joinTwoTables(curr_context)
         root = DecisionTreeNode()
         global_DTL(joined_table, root, O_pos, O_neg)
+        printTree(root)
         tree_size = treeSize(root)
         if runQ(root, N, ans):#tree_size <= N and findEntropy(root) == 0:
             ans = Q(O_pos, curr_context, root)
