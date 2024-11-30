@@ -108,10 +108,10 @@ def stringifyTuple(inputTuple):
 #given O+, context information, and a tree extract a query
 def Q(O_pos, context, tree):
     #use O+ to extract the name of the column actually being selected
-    selectedAttributes = ", ".join(list(O_pos[0].keys()))
+    selectedAttributes = ", ".join([f'"{key}"' for key in O_pos[0].keys()])
     #first get the join and table information
     joinTables = context["tableName"].split('&')
-    joinAttribute = context["joinCol"]
+    joinAttribute = context["joinCol"].split('&')[0]
 
     #then obtain the selection predicates from the decision tree
     selectionPredicates = []
