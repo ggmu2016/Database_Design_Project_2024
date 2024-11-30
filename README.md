@@ -1,15 +1,24 @@
 # Database_Design_Project_2024
 
-Potential Papers:
-1. https://www.vldb.org/pvldb/vol14/p708-rui.pdf
-2. https://sci-hub.ru/https://link.springer.com/article/10.1007/s13278-018-0507-0
-3. https://ieeexplore.ieee.org/document/914855
-4. https://www.seas.upenn.edu/~asnaik/assets/papers/vldb24_libra.pdf
-5. https://dl-acm-org.libproxy.utdallas.edu/doi/pdf/10.1145/3448016.3457242
+# Implemented Research Paper
+Relational Query Synthesis & Decision Tree Learning
+A paper that details a method to synthesize a query given output examples of an executed query.
+https://www.seas.upenn.edu/~asnaik/assets/papers/vldb24_libra.pdf
 
 # Software Setup Steps
 1. Run command "pip install sqlalchemy" to install Flask-SQLAlchemy
-2. Run command "pip install psycopg2-binary" to install necessary dependency
-
+2. Run command "pip install psycopg2-binary" to install necessary dependencies
 Consult https://docs.sqlalchemy.org/en/20/tutorial/index.html
 For more information on SQL ALchemy
+
+# Software Running
+1. Run command "python3 libra.py" to run the main algorithm
+2. Run command "python3 libra_test.py" to run the testing unit
+
+# Files and Their Descriptions
+create_large_dataset.py - Contains the schema definition of the larger data set used to test our system
+create_tables.py - Contains the schema definition of the data set used to develop and run the system. The main algorithm uses this dataset
+decision_tree_learning.py - Contains the logic, math, and functions to perform decision tree learning
+libra_test.py - Contains the system tests
+libra.py - Contains the main algorithm
+query_to_table.py - Contains a helper to convert SQLAlchemy results to a python dictionary
