@@ -12,14 +12,7 @@ queries = [
     "SELECT players.\"playerName\", teams.\"teamName\" FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" WHERE teams.city = 'Brandonport';",
     "SELECT players.\"playerName\" FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" WHERE age<26 and \"teamName\"='Prince Group';",
     "SELECT DISTINCT teams.\"teamName\" FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" WHERE age>33;",
-    # "SELECT DISTINCT players.\"playerName\", teams.\"teamName\" FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" WHERE position='Defender';",
-    "SELECT DISTINCT teams.\"teamName\" FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" JOIN merchandise ON teams.\"teamID\"=merchandise.\"teamID\" WHERE age>33 and price>70;",
-
-    # "SELECT name FROM teams JOIN  matches on \"teamID\"=\"homeTeamID\" WHERE \"homeScore\" > 3;",
-    # "SELECT name FROM teams JOIN  matches on \"teamID\"=\"homeTeamID\" WHERE \"homeScore\" > 3 and \"awayScore\" < 2;",
-    # "SELECT name FROM teams JOIN  matches on \"teamID\"=\"homeTeamID\" WHERE \"homeScore\" > \"awayScore\";",
-    # "SELECT player.name FROM teams JOIN  players JOIN matches on \"teamID\"=\"homeTeamID\" WHERE \"homeScore\" > \"awayScore\" and position='Forward';",
-    # "SELECT home_team.name, away_team.name, matches.\"homeScore\", matches.\"awayScore\" FROM matches JOIN teams AS home_team ON matches.\"homeTeamID\" = home_team.\"teamID\" JOIN teams AS away_team ON matches.\"awayTeamID\" = away_team.\"teamID\" WHERE matches.\"homeScore\" > matches.\"awayScore\";"
+    "SELECT DISTINCT teams.\"teamName\" FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" JOIN merchandise ON teams.\"teamID\"=merchandise.\"teamID\" WHERE age>33 and price>70;"
 ]
 
 def get_O_neg_query(query):

@@ -20,5 +20,3 @@ def Query2TupleLarge(query: str):
         result_dict = result.mappings().all() # python list of dictionaries
     return result_dict
 
-# function that creates a different table/or create view
-

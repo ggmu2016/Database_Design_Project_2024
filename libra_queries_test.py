@@ -13,7 +13,6 @@ class TestQueryToTable(unittest.TestCase):
             "SELECT players.\"playerName\" FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" WHERE age<26 and \"teamName\"='Prince Group';",
             "SELECT DISTINCT teams.\"teamName\" FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" WHERE age>33;",
             "SELECT DISTINCT \"teamName\" FROM teams JOIN merchandise ON teams.\"teamID\" = merchandise.\"teamID\" WHERE price>70;",
-            # "SELECT DISTINCT players.\"playerName\", teams.\"teamName\" FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" WHERE position='Defender';",
             "SELECT DISTINCT players.\"playerName\" FROM players WHERE position='Goalkeeper';",
             "SELECT DISTINCT teams.\"teamName\" FROM players JOIN teams ON players.\"teamID\" = teams.\"teamID\" JOIN merchandise ON teams.\"teamID\"=merchandise.\"teamID\" WHERE age>33 and price>70;"
             ]
