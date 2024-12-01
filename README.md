@@ -8,7 +8,9 @@ https://www.seas.upenn.edu/~asnaik/assets/papers/vldb24_libra.pdf
 # Software Setup Steps
 1. Run command "pip install sqlalchemy" to install Flask-SQLAlchemy  
 2. Run command "pip install psycopg2-binary" to install necessary dependencies  
-Consult https://docs.sqlalchemy.org/en/20/tutorial/index.html for more information on SQL ALchemy
+Consult https://docs.sqlalchemy.org/en/20/tutorial/index.html for more information on SQL Alchemy
+
+OR run "pip install -r requirements.txt" to install all necessary dependencies at once
 
 # Software Running
 1. Run command "python3 libra.py" to run the main algorithm  
