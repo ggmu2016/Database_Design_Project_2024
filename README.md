@@ -20,7 +20,6 @@ Consult https://docs.sqlalchemy.org/en/20/tutorial/index.html for more informati
 * create_tables.py - Contains the schema definition of the data set used to develop and run the system. The main algorithm uses this dataset  
 * decision_tree_learning.py - Contains the logic, math, and functions to perform decision tree learning  
 * libra_queries_test - Tests the 10 queries on the larger dataset
-* libra_test.py - Contains unit tests for libra functions
 * libra.py - Contains the main algorithm. This script attempts to replicate the query: SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = "Engineering"  
 * queries.py - Contains 10 queries for large dataset ranked for complexity and helper functions
 * query_to_table.py - Contains a helper to convert SQLAlchemy results to a python dictionary  
