@@ -34,19 +34,10 @@ class TestLibraFunctions(unittest.TestCase):
             {"studentID": "Erin", "deptCode": "Chem.", "courseID": 310, "school": "Arts and Science"},
         ])
 
-#TODO: wait for the implementation of decision_tree_learning
-    # def test_libra(self):
-    #     O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
-    #     O_neg = [{"studentID": "Charlie"}, {"studentID": "David"}]
-    #     result = libra(O_pos, O_neg)
-
     def test_treeSize(self):
         tree = DecisionTreeNode(1, DecisionTreeNode(2), DecisionTreeNode(3))
         size = treeSize(tree)
         self.assertEqual(size, 3)
-
-    def test_findEntropy(self):
-        pass
 
     def test_Q(self):
         O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
