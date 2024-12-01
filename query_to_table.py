@@ -8,7 +8,6 @@ def Query2Tuple(query: str, large=False):
     if not large:
         with engine.connect() as conn:
             result = conn.execute(text(query))
-            result_dict = result.mappings().all() # python list of dictionaries
     else:
         with largeEngine.connect() as conn:
             result = conn.execute(text(query))

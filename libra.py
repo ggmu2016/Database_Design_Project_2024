@@ -1,16 +1,12 @@
-import heapq
-import math
-
 from query_to_table import Query2Tuple
 from decision_tree_learning import global_DTL, printTree
-import collections
 # using a dictionary to store overall column names to tables, i.e, {col_name:[table1,...,tableN]}
 columnsInTables = {"teamID": ["teams", "players", "merchandise"], "city": ["teams"], "stadium": ["teams"], "teamName": ["teams"],
                 "playerID": ["players"], "position": ["players"], "age": ["players"], "playerName": ["players"], 
                 "matchID": ["matches"], "homeTeamID": ["matches"], "awayTeamID": ["matches"], "matchDate": ["matches"], "homeScore": ["matches"], "awayScore": ["matches"],
                 "merchandiseType": ["merchandise"], "price": ["merchandise"]}
 
-
+large = True
 def getNextContexts(context, init=False):
     """
     Gets next contexts from given contexts. Goes through all columns and all tables NOT in the input context.
@@ -23,6 +19,7 @@ def getNextContexts(context, init=False):
         next context: list of python dictionaries
 
     """
+    global large
     # removing tableName and common col from context
     tables = set()
     if "tableName" in context:
@@ -36,7 +33,7 @@ def getNextContexts(context, init=False):
         for table in columnsInTables[c]:
             if table not in tables:
                 query = f"select * from {table} where \"{c}\" = '{context[c]}'"
-                res = Query2Tuple(query, large=True)
+                res = Query2Tuple(query, large=large)
                 if res:
                     # add table name to each dictionary
                     for i in range(len(res)):
@@ -53,8 +50,6 @@ def getNextContexts(context, init=False):
                 acc = joinContexts(acc, nextContexts[i])[0]
         nextContexts = [acc]
     return nextContexts
-
-
 
 def joinContexts(context1, context2):
     """
@@ -178,6 +173,7 @@ def joinTwoTables(joined_context):
     Returns:
 
     """
+    global large
     # creates the join table from T1 and T2 and saves it in the database for easy access
     table_names = joined_context["tableName"].split('&')
     join_keys = joined_context["joinCol"].split('&')
@@ -195,7 +191,7 @@ def joinTwoTables(joined_context):
             query += f' join {table} on {table_prev}."{join_keys[idx-1]}"={table}."{join_keys[idx-1]}"'
             table_prev = table
 
-    res = Query2Tuple(query, large=True)
+    res = Query2Tuple(query, large=large)
     return res
 
 def checkMarkExists(node):
@@ -253,82 +249,32 @@ def libra(O_pos, O_neg):
         if len(curr_context) > N or curr_context["tableName"] in visited_tables:
             continue
 
-        print("WHO MADE IT")
-        print(curr_context)
+        # print("WHO MADE IT")
+        # print(curr_context)
         visited_tables.add(curr_context["tableName"])
         joined_table = joinTwoTables(curr_context)
         root = DecisionTreeNode()
         global_DTL(joined_table, root, O_pos, O_neg)
-        printTree(root)
+        # printTree(root)
         tree_size = treeSize(root)
-        if runQ(root, N, ans):#tree_size <= N and findEntropy(root) == 0:
+        if runQ(root, N, ans):
             ans = Q(O_pos, curr_context, root)
             N = tree_size
 
     return ans
 
 def main():
-
-    # ============= testing getNextContexts ===================================================================
-    context = {"studentID": "Alice", "deptCode": "Comp.", "courseID": 201, "tableName": "registration&major"}
-    #result = getNextContexts(context)
-    #print(result)      # returns list of dictionaries
-
-    # =========================================================================================================
-
-    # ============= testing joinContexts =====================================================================
-    context1 = {'studentID': 'Alice', 'deptCode': 'Comp.', 'courseID': 201, 'tableName': 'registration'}
-    context2 = {'deptCode': 'Comp.', 'school': 'Engineering', 'tableName': 'department'}
-    #(joined_contexts, joined_colname) = joinContexts(context1,context2)
-    #print('joined_contexts: ', joined_contexts)
-    #print('joined_colname: ', joined_colname)
-
-    # ========================================================================================================
-
+    global columnsInTables
+    global large 
+    columnsInTables = {"studentID": ["registration", "major"], "deptCode": ["registration", "major", "department"],
+                   "courseID": ["registration"],
+                   "school": ["department"]}
+    large = False
     # # ============= testing Libra =====================================================================
-    # O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
-    # O_neg = [{"studentID": "Charlie"}, {"studentID": "David"}]
-    # res = libra(O_pos,O_neg)
-    # print(res)
-    # ========================================================================================================
+    O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
+    O_neg = [{"studentID": "Charlie"}, {"studentID": "David"}]
+    res = libra(O_pos,O_neg)
+    print(res)
 
-
-
-
-
-    # Hyuntae's stuff
-    #O_pos = Query2Tuple('SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = \'Engineering\'')
-    #print(O_pos)
-
-    departmentTable = Query2Tuple(
-        'SELECT * FROM department')  # we need to decide how to convert the resultant object into something we can work with
-    majorTable = Query2Tuple('SELECT * FROM major')
-    registrationTable = Query2Tuple('SELECT * FROM registration')
-
-    #print(departmentTable)
-    #print(majorTable)
-    #print(registrationTable)
-
-    # positiveQuery = Query2Tuple(
-    #     'SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" < 500 AND department."school" = \'Engineering\'')
-    # O_pos = set()
-    # for row in positiveQuery:
-    #     O_pos.add(tuple(row))
-    # O_pos = list(O_pos)
-    #
-    # negativeQuery = Query2Tuple(
-    #     'SELECT registration."studentID" FROM registration JOIN department ON registration."deptCode" = department."deptCode" WHERE registration."courseID" >= 500 OR department."school" != \'Engineering\'')
-    # O_neg = set()
-    # for row in negativeQuery:
-    #     if tuple(row) not in O_pos:
-    #         O_neg.add(tuple(row))
-    # O_neg = list(O_neg)
-    #
-    # print(O_pos)
-    # print(O_neg)
-
-    #libra(O_pos, O_neg)
-
-
-
-main()
+if __name__ == "__main__":
+    main()
