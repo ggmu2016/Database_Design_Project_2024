@@ -5,12 +5,13 @@ from query_to_table import Query2Tuple
 from decision_tree_learning import global_DTL, printTree
 import collections
 # using a dictionary to store overall column names to tables, i.e, {col_name:[table1,...,tableN]}
-columnsInTables = {"studentID": ["registration", "major"], "deptCode": ["registration", "major", "department"],
-                   "courseID": ["registration"],
-                   "school": ["department"]}
+columnsInTables = {"teamID": ["teams", "players", "merchandise"], "city": ["teams"], "stadium": ["teams"], "teamName": ["teams"],
+                "playerID": ["players"], "position": ["players"], "age": ["players"], "playerName": ["players"], 
+                "matchID": ["matches"], "homeTeamID": ["matches"], "awayTeamID": ["matches"], "matchDate": ["matches"], "homeScore": ["matches"], "awayScore": ["matches"],
+                "merchandiseType": ["merchandise"], "price": ["merchandise"]}
 
 
-def getNextContexts(context):
+def getNextContexts(context, init=False):
     """
     Gets next contexts from given contexts. Goes through all columns and all tables NOT in the input context.
     Adds a couple of keys to each dictionary, "tableName" and "joinCol"
@@ -35,7 +36,7 @@ def getNextContexts(context):
         for table in columnsInTables[c]:
             if table not in tables:
                 query = f"select * from {table} where \"{c}\" = '{context[c]}'"
-                res = Query2Tuple(query)
+                res = Query2Tuple(query, large=True)
                 if res:
                     # add table name to each dictionary
                     for i in range(len(res)):
@@ -44,6 +45,13 @@ def getNextContexts(context):
                         res_dict['tableName'] = table
                         res_dict['joinCol'] = c
                         nextContexts.append(res_dict)
+    
+    if init and len(context.keys()) > 1:
+        acc = nextContexts[0]
+        for i in range(len(nextContexts)):
+            if nextContexts[i]['tableName'] not in acc['tableName'] and nextContexts[i]['joinCol'] != acc['joinCol']:
+                acc = joinContexts(acc, nextContexts[i])[0]
+        nextContexts = [acc]
     return nextContexts
 
 
@@ -61,13 +69,13 @@ def joinContexts(context1, context2):
     joinedContext = context1   # dictionary
     commonKey = None
     for key in context1.keys():
-        if key in context2 and context1[key]==context2[key] and context1['tableName']!=context2['tableName']:
+        if key in context2.keys() and context1[key]==context2[key] and context1['tableName']!=context2['tableName']:
             commonKey = key
             break
 
     # join the dicts together
     for key, val in context2.items():
-        if commonKey and key!=commonKey and key not in context1 and key!="tableName":
+        if commonKey and key!=commonKey and key not in context1.keys() and key!="tableName":
             joinedContext[key] = val
 
     # rename tableName to joint table name
@@ -100,10 +108,10 @@ def stringifyTuple(inputTuple):
 #given O+, context information, and a tree extract a query
 def Q(O_pos, context, tree):
     #use O+ to extract the name of the column actually being selected
-    selectedAttributes = ", ".join(list(O_pos[0].keys()))
+    selectedAttributes = ", ".join([f'"{key}"' for key in O_pos[0].keys()])
     #first get the join and table information
     joinTables = context["tableName"].split('&')
-    joinAttribute = context["joinCol"]
+    joinAttribute = context["joinCol"].split('&')[0]
 
     #then obtain the selection predicates from the decision tree
     selectionPredicates = []
@@ -113,8 +121,9 @@ def Q(O_pos, context, tree):
             return
         # determines if the node is a leaf or a predicate
         if node.value != "?" and node.value != "✓" and node.value != "X":
+            node.value = (f'"{node.value[0]}"', node.value[1], node.value[2])
             if type(node.value[2]) != int:
-                node.value = (node.value[0], node.value[1], '"' + str(node.value[2]) + '"')
+                node.value = (node.value[0], node.value[1], f"'{node.value[2]}'")
             leftPredicates = []
             rightPredicates = []
             for predicate in predicates:
@@ -186,7 +195,7 @@ def joinTwoTables(joined_context):
             query += f' join {table} on {table_prev}."{join_keys[idx-1]}"={table}."{join_keys[idx-1]}"'
             table_prev = table
 
-    res = Query2Tuple(query)
+    res = Query2Tuple(query, large=True)
     return res
 
 def checkMarkExists(node):
@@ -219,7 +228,7 @@ def libra(O_pos, O_neg):
     """
     N = float("inf")
     init_context = O_pos[0]
-    next_contexts = getNextContexts(init_context) # list of dictionaries
+    next_contexts = getNextContexts(init_context, init=True) # list of dictionaries
     L = next_contexts.copy()
     visited_tables = set()
     ans = None
@@ -243,10 +252,14 @@ def libra(O_pos, O_neg):
 
         if len(curr_context) > N or curr_context["tableName"] in visited_tables:
             continue
+
+        print("WHO MADE IT")
+        print(curr_context)
         visited_tables.add(curr_context["tableName"])
         joined_table = joinTwoTables(curr_context)
         root = DecisionTreeNode()
         global_DTL(joined_table, root, O_pos, O_neg)
+        printTree(root)
         tree_size = treeSize(root)
         if runQ(root, N, ans):#tree_size <= N and findEntropy(root) == 0:
             ans = Q(O_pos, curr_context, root)
@@ -272,11 +285,11 @@ def main():
 
     # ========================================================================================================
 
-    # ============= testing Libra =====================================================================
-    O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
-    O_neg = [{"studentID": "Charlie"}, {"studentID": "David"}]
-    res = libra(O_pos,O_neg)
-    print(res)
+    # # ============= testing Libra =====================================================================
+    # O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
+    # O_neg = [{"studentID": "Charlie"}, {"studentID": "David"}]
+    # res = libra(O_pos,O_neg)
+    # print(res)
     # ========================================================================================================
 
 

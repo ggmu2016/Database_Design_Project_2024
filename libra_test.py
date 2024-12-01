@@ -6,8 +6,6 @@ class TestLibraFunctions(unittest.TestCase):
     def test_getNextContexts(self):
         context = {"studentID": "Alice", "deptCode": "Comp.", "courseID": 201, "tableName": "registration"}
         result = getNextContexts(context)
-        self.assertIsInstance(result, list)
-        self.assertTrue(all(isinstance(item, dict) for item in result))
         self.assertEqual(result, [
             {'studentID': 'Alice', 'deptCode': 'Chem.', 'tableName': 'major', 'joinCol': 'studentID'},
             {'studentID': 'Bob', 'deptCode': 'Comp.', 'tableName': 'major', 'joinCol': 'deptCode'},
@@ -21,6 +19,21 @@ class TestLibraFunctions(unittest.TestCase):
         self.assertEqual(joined_contexts, {'studentID': 'Alice', 'deptCode': 'Comp.', 'courseID': 201, 'school': 'Engineering', 'tableName': 'registration&department', 'joinCol': 'deptCode'})
         self.assertEqual(joined_colname, 'deptCode')
 
+    def test_joinTwoTables(self):
+        context = {'studentID': 'Alice', 'deptCode': 'Comp.', 'courseID': 201, 'school': 'Engineering', 'tableName': 'registration&department', 'joinCol': 'deptCode'}
+        table = joinTwoTables(context)
+        self.assertEqual(table, [
+            {"studentID": "Alice", "deptCode": "Comp.", "courseID": 201, "school": "Engineering"},
+            {"studentID": "Alice", "deptCode": "Chem.", "courseID": 310, "school": "Arts and Science"},
+            {"studentID": "Alice", "deptCode": "Mech.", "courseID": 550, "school": "Engineering"},
+            {"studentID": "Bob", "deptCode": "Mech.", "courseID": 320, "school": "Engineering"},
+            {"studentID": "Bob", "deptCode": "Mech.", "courseID": 550, "school": "Engineering"},
+            {"studentID": "Charlie", "deptCode": "Chem.", "courseID": 310, "school": "Arts and Science"},
+            {"studentID": "David", "deptCode": "Comp.", "courseID": 500, "school": "Engineering"},
+            {"studentID": "David", "deptCode": "Mech.", "courseID": 502, "school": "Engineering"},
+            {"studentID": "Erin", "deptCode": "Chem.", "courseID": 310, "school": "Arts and Science"},
+        ])
+
 #TODO: wait for the implementation of decision_tree_learning
     # def test_libra(self):
     #     O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
@@ -32,14 +45,16 @@ class TestLibraFunctions(unittest.TestCase):
         size = treeSize(tree)
         self.assertEqual(size, 3)
 
-#TODO: wait for implementation of decision tree
-    # def test_Q(self):
-    #     O_pos = [{"studentID": "Alice"}]
-    #     context = {"studentID": "Alice", "tableName": "registration&department", "joinCol": "deptCode"}
-    #     tree = DecisionTreeNode("deptCode = 'Comp.'", DecisionTreeNode("yes"), DecisionTreeNode("no"))
-    #     query = Q(O_pos, context, tree)
-    #     expected_query = "SELECT studentID FROM registration JOIN department ON registration.deptCode=department.deptCode WHERE deptCode = 'Comp.';"
-    #     self.assertEqual(query, expected_query)
+    def test_findEntropy(self):
+        pass
+
+    def test_Q(self):
+        O_pos = [{"studentID": "Alice"}, {"studentID": "Bob"}]
+        context = {"studentID": "Alice", "deptCode": "Comp.", "courseID": 201, "tableName": "registration&department", "joinCol": "deptCode"}
+        tree = DecisionTreeNode("deptCode = 'Comp.'", DecisionTreeNode("?"), DecisionTreeNode("✓"))
+        query = Q(O_pos, context, tree)
+        expected_query = "SELECT studentID FROM registration JOIN department ON registration.deptCode=department.deptCode WHERE deptCode = 'Comp.';"
+        self.assertEqual(query, expected_query)
 
 if __name__ == '__main__':
     unittest.main()
