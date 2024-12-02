@@ -14,7 +14,14 @@ OR run "pip install -r requirements.txt" to install all necessary dependencies a
 
 # Software Running
 1. Run command "python3 libra.py" to run the main algorithm  
-2. Run command "python3 libra_queries_test.py" to run the testing unit  
+2. Run command "python3 libra_queries_test.py" to run the testing unit
+
+# Datasets 
+Datasets are hosted on Neon.tech.
+Here are the links to the spreadsheet representations of our datasets. These contain the data entries that are currently held in the DBMS.  
+School dataset (used in libra.py): https://docs.google.com/spreadsheets/d/1yVK-vh60DtnToN40fMMd3KIGLydSTTsiD2wg6_uiH_A/edit?usp=sharing  
+Football dataset (used in libra_test.py): https://docs.google.com/spreadsheets/d/1yAuEob48OQH7C4s1aX_cnSOoHMT0h2lpWTs8yz97NrY/edit?usp=sharing  
+If direct access to the Neon interface is needed, please make an account at neon.tech and contact hxk210048@utdallas.edu for more information.  
 
 # Files and Their Descriptions
 * create_graph.py - Contains code to generate the query runtime graph
